@@ -1,7 +1,0 @@
-{
-  "files.associations": {
-    "*.c": "c",
-    "token.h": "c",
-    "stdlib.h": "c"
-  }
-}
