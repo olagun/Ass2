@@ -16,6 +16,10 @@ int main(int argc, char** argv) {
 
   server = Server_create("8000");
 
+  if (server == NULL) {
+    return 0;
+  }
+
   while (1) {
     Server_accept(server, on_message);
   }

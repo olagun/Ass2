@@ -54,6 +54,10 @@ Server* Server_create(char* port) {
 
   // Create socket and connect to port.
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  int option = 1;
+  // https://stackoverflow.com/questions/5106674/error-address-already-in-use-while-binding-socket-with-address-but-the-port-num
+  setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
+
   if (bind(socket_fd, result->ai_addr, result->ai_addrlen) != 0) {
     printf("%s\n", strerror(errno));
     return NULL;
