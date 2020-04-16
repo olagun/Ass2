@@ -4,17 +4,33 @@
 
 #include "src/server.h"
 
-char* handle_message(Token* message) {
+Server* server;
+
+void on_exit();
+void on_interrupt();
+char* on_message(Token* message);
+
+int main(int argc, char** argv) {
+  atexit(on_exit);
+  signal(SIGINT, on_interrupt);
+
+  server = Server_create("8000");
+
+  while (1) {
+    Server_accept(server, on_message);
+  }
+
+  return 0;
+}
+
+char* on_message(Token* message) {
   // send message back
   return "some message in response";
 }
 
-int main(int argc, char** argv) {
-  Server* server = Server_create("8000");
+void on_exit() { close(server->socket_fd); }
 
-  while (1) {
-    Server_accept(server, handle_message);
-  }
-
-  return 0;
+void on_interrupt() {
+  printf("Bye\n");
+  exit(1);
 }

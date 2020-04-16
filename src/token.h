@@ -7,6 +7,8 @@ typedef struct Token {
 } Token;
 
 Token* Token_new(char* token);
+int Token_size(Token* head);
+char* Token_to_string(Token* head);
 void Token_print(Token* token);
 Token* Token_append(Token* head, Token* token);
 

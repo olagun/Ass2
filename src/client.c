@@ -35,9 +35,9 @@ Token* Client_send(char* url, char* port, char* message) {
     return NULL;
   }
 
-  printf("Sent '" BLU "%s" RESET "' to the server\n", message);
   // Write message to socket connection.
-  write(fd, message, strlen(message));
+  write(fd, message, strlen(message) + 1);
+  printf("Sent '" BLU "%s" RESET "' to the server\n", message);
 
   // Read one char at a time in to linked l ist.
   char* buffer = malloc(sizeof(char) * 2);
