@@ -8,14 +8,13 @@ Server* server;
 
 void on_exit();
 void on_interrupt();
-char* on_message(Token* message);
+char* on_message(char* message);
 
 int main(int argc, char** argv) {
   atexit(on_exit);
   signal(SIGINT, on_interrupt);
 
   server = Server_create("8000");
-
   if (server == NULL) {
     return 0;
   }
@@ -27,7 +26,7 @@ int main(int argc, char** argv) {
   return 0;
 }
 
-char* on_message(Token* message) {
+char* on_message(char* message) {
   // send message back
   return "some message in response";
 }

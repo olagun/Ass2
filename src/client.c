@@ -49,5 +49,8 @@ Token* Client_send(char* url, char* port, char* message) {
   }
   close(fd);
 
+  char* response_string = Token_to_string(head);
+  printf("Recieved '" BLU "%s" RESET "' in response\n", response_string);
+
   return head;
 }

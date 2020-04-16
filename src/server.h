@@ -3,7 +3,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-typedef char* Handler(Token*);
+typedef char* Handler(char*);
 
 typedef struct Server {
   int socket_fd;

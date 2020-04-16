@@ -29,11 +29,13 @@ void Server_accept(Server* server, Handler* handler) {
     message = Token_append(message, token);
   }
 
-  printf("Recieved '" BLU "%s" RESET "' from client\n",
-         Token_to_string(message));
+  char* message_string = Token_to_string(message);
+  printf("Recieved '" BLU "%s" RESET "' from client\n", message_string);
 
-  char* response = handler(message);
+  char* response = handler(message_string);
+
   write(client_fd, response, strlen(response));
+  printf("Sent '" BLU "%s" RESET "' to the client\n", response);
 
   close(client_fd);
 }
