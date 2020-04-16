@@ -1,12 +1,13 @@
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
-#include "token.h"
 #include "configure.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "../token/token.h"
+
 void Configure_write(char* ip, char* port) {
-    // Writes `port` to configure.
+  // Writes `port` to configure.
   Token* head = NULL;
   head = Token_append(head, Token_new(ip));
   head = Token_append(head, Token_new(":"));
@@ -16,6 +17,7 @@ void Configure_write(char* ip, char* port) {
 }
 
 // TODO: check if file is null or token_read is null, etc.
+// Reads in the configuration file.
 Configure* Configure_read() {
   char* file = Token_to_string(Token_read("./.configure"));
 

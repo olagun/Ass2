@@ -8,9 +8,8 @@
 #include <string.h>
 #include <openssl/md5.h>
 
-#include "boolean.h"
-#include "src/client.h"
-
+#include "../../src/boolean/boolean.h"
+#include "../../src/client/client.h"
 
 // https://rosettacode.org/wiki/SHA-256#C
 

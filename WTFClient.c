@@ -2,10 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "create.h"
-#include "src/client.h"
-#include "src/color.h"
-#include "src/configure.h"
+
+
+#include "src/client/client.h"
+#include "src/color/color.h"
+#include "src/configure/configure.h"
+
+#include "commands/create/create.h"
 
 int main(int argc, char** argv) {
   // Token* response = Client_send("127.0.0.1", "8000", "some message");

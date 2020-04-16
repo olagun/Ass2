@@ -1,54 +1,69 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/stat.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "create.h"
 #include "src/server.h"
 
-void on_exit();
-void on_interrupt();
-char* on_message(char* message);
+// Closes the server socket before exiting.
+void exit() { close(server->socket_fd); }
+
+// Catches `Ctrl + C` interrupt.
+// May be used later on when deallocating the closed
+// program.
+void interrupt() {
+  printf("Bye\n");
+  exit(1);
+}
 
 Server* server;
 
-int main(int argc, char** argv) {
-  atexit(on_exit);
-  signal(SIGINT, on_interrupt);
+// Function called every time a message is recieved.
+char* on_request(char* command, char* body);
 
-  server = Server_create("8000");
-  if (server == NULL) {
+int main(int argc, char** argv) {
+  if (argc < 2) {
+    printf("Missing arguments.\n");
     return 0;
   }
 
+  // Register signal handlers.
+  atexit(exit);
+  signal(SIGINT, interrupt);
+
+  // Start server on port.
+  char* port = argv[1];
+  server = Server_create(port);
+  if (server == NULL) {
+    printf("Server couldn't be started.\n");
+    return 0;
+  }
+
+  // Setup server folders.
   mkdir("projects", 0777);
   mkdir("history", 0777);
   mkdir("commits", 0777);
 
+  // Start accepting client connections.
   while (1) {
-    Server_accept(server, on_message);
+    Server_accept(server, on_request);
   }
 
   return 0;
 }
 
-// <command>:<body>
-char* on_message(char* message) {
-  char* command = strtok(stdup(message), ":");
-  char* body = strchr(message, ':') + 1;  // substring of messaage after <command>
-
+// Takes in a client request command and body.
+// Returns response as a string.
+char* on_request(char* command, char* body) {
   if (strcmp("create", command) == 0) {
     return Create_server(body);
   }
 
-  // send message back
-  return  "command not recognized";
-}
+  // if (strcmp("<command_name>", command) == 0) {
+  //   return <Command_name>_server(body);
+  // }
 
-void on_exit() { close(server->socket_fd); }
-
-void on_interrupt() {
-  printf("Bye\n");
-  exit(1);
+  return "Command not recognized.";
 }

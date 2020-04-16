@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#include "src/client.h"
+#include "../../src/client/client.h"
 
 char* destroy(char* project) {
     

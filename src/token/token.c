@@ -1,10 +1,10 @@
 #include "token.h"
 
 #include <fcntl.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 Token* Token_new(char* token) {
   Token* new = malloc(sizeof(Token));
@@ -57,7 +57,6 @@ Token* Token_append(Token* head, Token* token) {
   return head;
 }
 
-
 // reads a file into a linked list
 Token* Token_read(char* filename) {
   if (filename == NULL) return NULL;
@@ -66,7 +65,7 @@ Token* Token_read(char* filename) {
 
   Token* head = NULL;
   char* buffer = malloc(sizeof(char) * 2);
-  while(read(fd, buffer, 1) > 0) {
+  while (read(fd, buffer, 1) > 0) {
     Token* token = Token_new(buffer);
     head = Token_append(head, token);
   }
