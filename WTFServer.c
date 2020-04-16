@@ -4,21 +4,20 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "create.h"
-#include "src/server.h"
+#include "commands/create/create.h"
+#include "src/server/server.h"
+
+Server* server;
 
 // Closes the server socket before exiting.
-void exit() { close(server->socket_fd); }
+void on_exit() { close(server->socket_fd); }
 
 // Catches `Ctrl + C` interrupt.
-// May be used later on when deallocating the closed
-// program.
-void interrupt() {
+// May be used later on when deallocating the closed program.
+void on_interrupt() {
   printf("Bye\n");
   exit(1);
 }
-
-Server* server;
 
 // Function called every time a message is recieved.
 char* on_request(char* command, char* body);
@@ -30,8 +29,8 @@ int main(int argc, char** argv) {
   }
 
   // Register signal handlers.
-  atexit(exit);
-  signal(SIGINT, interrupt);
+  atexit(on_exit);
+  signal(SIGINT, on_interrupt);
 
   // Start server on port.
   char* port = argv[1];

@@ -13,16 +13,16 @@
 
 #include "../../src/client/client.h"
 
-char* destroy(char* project) {
+// char* destroy(char* project) {
     
-    char* directory = "direct";
-    //fails if name doesn't exist or client can't communicate
-    struct stat st = {0};
-    if (stat(directory, &st) == -1) {  //replace some directory with actual pathname
-        if(server_create(8000) == NULL){ //how to access actualt port #
-            printf("%s", "destroy command failed");
-        }
-    }
+    // char* directory = "direct";
+    // //fails if name doesn't exist or client can't communicate
+    // struct stat st = {0};
+    // if (stat(directory, &st) == -1) {  //replace some directory with actual pathname
+    //     if(Server_create(8000) == NULL){ //how to access actualt port #
+    //         printf("%s", "destroy command failed");
+    //     }
+    // }
 
     //lock repository, expire commits, delete all the files
     //receives a name of from WTFClient, access the thread of that project
@@ -31,4 +31,4 @@ char* destroy(char* project) {
 
     //make a server folder and client folder to test
 
-}
+// }
