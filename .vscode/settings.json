@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "server.h": "c",
+        "create.h": "c"
+    }
+}

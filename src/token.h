@@ -12,5 +12,6 @@ char* Token_to_string(Token* head);
 void Token_write(char* filename, Token* token);
 void Token_print(Token* token);
 Token* Token_append(Token* head, Token* token);
+Token* Token_read(char* filename);
 
 #endif

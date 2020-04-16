@@ -56,3 +56,20 @@ Token* Token_append(Token* head, Token* token) {
   head->next = Token_append(head->next, token);
   return head;
 }
+
+
+// reads a file into a linked list
+Token* Token_read(char* filename) {
+  if (filename == NULL) return NULL;
+
+  int fd = open(filename, O_RDONLY, 0777);
+
+  Token* head = NULL;
+  char* buffer = malloc(sizeof(char) * 2);
+  while(read(fd, buffer, 1) > 0) {
+    Token* token = Token_new(buffer);
+    head = Token_append(head, token);
+  }
+
+  return head;
+}

@@ -10,29 +10,35 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <string.h>
 
+#include "src/color.h"
 #include "src/client.h"
 
-int main(int argc, char** argv) {
-    
-    char* directory = "direct";
-    //creates the project folder
-    struct stat st = {0};
-    if (stat(directory, &st) == -1) {  //replace some directory with actual pathname
-        if(server_create(8000) == NULL){ //how to access actualt port #
-            mkdir("/some/directory", 0700);
-        }
-    }
-
-    //create the .Manifest file
-    char *filepath = malloc(strlen(directory) + strlen(".Manifest") + 2);
-    filepath = strcpy(filepath, directory);
-    filepath = strcat(filepath, ".Manifest");
-    
-    int filedescriptor = open(*filepath, O_RDWR |O_CREAT);
-    if (filedescriptor < 0){
-        perror("Error creating .Manifest file\n");
-        exit(-1);
-    }
+void Create_client(char* project_name){
+    char message[1000];
+    sprintf(message, "create:%s:", project_name);
+    char* response = Client_send(message);
 }
 
+char* Create_server(char* body) {
+    char* project_name = strtok(strdup(body), ":");
+    char* project_path = malloc(strlen("projects/") + strlen(project_name) + 1);
+    strcpy(project_path, "projects/");
+    strcat(project_path, project_name);
+
+    if (mkdir(project_path, 0777) < 0)  {
+        // note: will fail if project name already exists
+        return "failure:";
+    }
+
+    if (creat(".Manifest", 0777) < 0) {
+        return "failure:";
+    }
+    
+    char message[1000];
+    sprintf(message, GRN "Success!" RESET " created project '" BLU "%s" RESET "'", project_name);
+
+    // return serialize(project_name)
+    return "created project";
+}

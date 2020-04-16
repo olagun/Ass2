@@ -13,7 +13,7 @@
 
 #include "src/client.h"
 
-int main(int argc, char** argv) {
+char* destroy(char* project) {
     
     char* directory = "direct";
     //fails if name doesn't exist or client can't communicate
@@ -28,5 +28,7 @@ int main(int argc, char** argv) {
     //receives a name of from WTFClient, access the thread of that project
     //a thread is made for every new connection, mutex only for project (locking the mutex for the project)
     //client send
-    
+
+    //make a server folder and client folder to test
+
 }

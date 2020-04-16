@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <string.h>
 
+#include "create.h"
 #include "src/server.h"
 
 void on_exit();
@@ -19,6 +22,10 @@ int main(int argc, char** argv) {
     return 0;
   }
 
+  mkdir("projects", 0777);
+  mkdir("history", 0777);
+  mkdir("commits", 0777);
+
   while (1) {
     Server_accept(server, on_message);
   }
@@ -26,9 +33,17 @@ int main(int argc, char** argv) {
   return 0;
 }
 
+// <command>:<body>
 char* on_message(char* message) {
+  char* command = strtok(stdup(message), ":");
+  char* body = strchr(message, ':') + 1;  // substring of messaage after <command>
+
+  if (strcmp("create", command) == 0) {
+    return Create_server(body);
+  }
+
   // send message back
-  return "some message in response";
+  return  "command not recognized";
 }
 
 void on_exit() { close(server->socket_fd); }

@@ -8,10 +8,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "configure.h"
 #include "color.h"
+#include "token.h"
 
 // Returns a linked list containing the response.
-Token* Client_send(char* url, char* port, char* message) {
+char* Client_send(char* message) {
+  Configure* config = Configure_read();
+
+  // printf("%s %s\n", config->ip, config->port);
+
   // `addrinfo` settings.
   struct addrinfo hints;
   memset(&hints, 0, sizeof(struct addrinfo));
@@ -20,7 +26,7 @@ Token* Client_send(char* url, char* port, char* message) {
 
   // Convert URL/Port into IP.
   struct addrinfo* result;
-  if (getaddrinfo(url, port, &hints, &result) != 0) {
+  if (getaddrinfo(config->ip, config->port, &hints, &result) != 0) {
     // Could not find server.
     return NULL;
   }
@@ -48,5 +54,5 @@ Token* Client_send(char* url, char* port, char* message) {
   char* response_string = Token_to_string(head);
   printf("Recieved '" BLU "%s" RESET "' in response\n", response_string);
 
-  return head;
+  return Token_to_string(head);
 }

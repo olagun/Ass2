@@ -1,6 +1,12 @@
 #ifndef CONFIGURE_H
 #define CONFIGURE_H
 
-void configure(char* ip, char* port);
+typedef struct {
+  char* ip;
+  char* port;
+} Configure;
+
+void Configure_write(char* ip, char* port);
+Configure* Configure_read();
 
 #endif

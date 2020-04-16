@@ -7,6 +7,7 @@
 #ifndef CREATE_H
 #define CREATE_H
 
-int main(int argc, char** argv);
+void Create_client(char* project_name);
+char* Create_server(char* project_name);
 
 #endif

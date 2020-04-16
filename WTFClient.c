@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "create.h"
 #include "src/client.h"
 #include "src/color.h"
 #include "src/configure.h"
 
 int main(int argc, char** argv) {
-  Token* response = Client_send("127.0.0.1", "8000", "some message");
+  // Token* response = Client_send("127.0.0.1", "8000", "some message");
 
   // TODO: Refactor into 'flags.c'
   if (argc < 2) {
@@ -21,7 +22,14 @@ int main(int argc, char** argv) {
       return 0;
     }
 
-    configure(argv[2], argv[3]);
+    Configure_write(argv[2], argv[3]);
+  } else if (strcmp(argv[1], "create") == 0) {
+    if (argc < 3) {
+      printf("Missing <project>");
+      return 0;
+    }
+
+    Create_client(argv[2]);
   } else {
     printf("Flag '" BLU "%s" RESET "' does not exist\n", argv[1]);
   }
