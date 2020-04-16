@@ -8,9 +8,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define BLU "\e[0;34m"
-#define GRN "\e[0;32m"
-#define RESET "\e[0m"
+#include "color.h"
 
 // Returns a linked list containing the response.
 Token* Client_send(char* url, char* port, char* message) {
@@ -27,27 +25,27 @@ Token* Client_send(char* url, char* port, char* message) {
   }
 
   // Create socket to add connection to.
-  int fd = socket(AF_INET, SOCK_STREAM, 0);
+  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 
   // Connect socket to address.
-  if (connect(fd, result->ai_addr, result->ai_addrlen) != 0) {
+  if (connect(socket_fd, result->ai_addr, result->ai_addrlen) != 0) {
     // Could not connect to server.
     return NULL;
   }
 
   // Write message to socket connection.
-  write(fd, message, strlen(message) + 1);
+  write(socket_fd, message, strlen(message) + 1);
   printf("Sent '" BLU "%s" RESET "' to the server\n", message);
 
   // Read one char at a time in to linked l ist.
   char* buffer = malloc(sizeof(char) * 2);
   memset(buffer, '\0', 2);
   Token* head = NULL;
-  while (read(fd, buffer, 1) > 0) {
+  while (read(socket_fd, buffer, 1) > 0) {
     Token* token = Token_new(buffer);
     head = Token_append(head, token);
   }
-  close(fd);
+  close(socket_fd);
 
   char* response_string = Token_to_string(head);
   printf("Recieved '" BLU "%s" RESET "' in response\n", response_string);

@@ -4,11 +4,11 @@
 
 #include "src/server.h"
 
-Server* server;
-
 void on_exit();
 void on_interrupt();
 char* on_message(char* message);
+
+Server* server;
 
 int main(int argc, char** argv) {
   atexit(on_exit);

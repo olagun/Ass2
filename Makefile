@@ -9,4 +9,4 @@ WTFServer:
 	gcc $(src_files) WTFServer.c -o WTFServer
 
 clean:
-	rm -rf WTFClient WTFServer
+	rm -rf WTFClient WTFServer .configure

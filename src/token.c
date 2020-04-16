@@ -1,5 +1,7 @@
 #include "token.h"
 
+#include <fcntl.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,6 +37,18 @@ void Token_print(Token* token) {
   if (token == NULL) return;
   printf("%s", token->token);
   Token_print(token->next);
+}
+
+void Token_write(char* filename, Token* head) {
+  if (head == NULL) return;
+  int write_fd = creat(filename, 0777);
+
+  while (head != NULL) {
+    write(write_fd, head->token, strlen(head->token));
+    head = head->next;
+  }
+
+  close(write_fd);
 }
 
 Token* Token_append(Token* head, Token* token) {

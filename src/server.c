@@ -10,11 +10,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "color.h"
 #include "token.h"
-
-#define BLU "\e[0;34m"
-#define GRN "\e[0;32m"
-#define RESET "\e[0m"
 
 void Server_accept(Server* server, Handler* handler) {
   int client_fd = accept(server->socket_fd, NULL, NULL);
@@ -49,7 +46,7 @@ Server* Server_create(char* port) {
   hints.ai_flags = AI_PASSIVE;
 
   // Convert URL/Port into IP.
-  if (getaddrinfo(NULL, "8000", &hints, &result) != 0) {
+  if (getaddrinfo(NULL, port, &hints, &result) != 0) {
     printf("%s\n", strerror(errno));
     return NULL;
   }
