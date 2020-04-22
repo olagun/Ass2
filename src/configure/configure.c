@@ -1,31 +1,31 @@
 #include "configure.h"
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
+#include "../read/read.h"
 #include "../token/token.h"
 
-void Configure_write(char* ip, char* port) {
-  // Writes `port` to configure.
-  Token* head = NULL;
-  head = Token_append(head, Token_new(ip));
-  head = Token_append(head, Token_new(":"));
-  head = Token_append(head, Token_new(port));
+Configure* configure_new() { return calloc(1, sizeof(Configure)); }
 
-  Token_write(".configure", head);
+void configure_write(char* ip, char* port) {
+  int configure_fd = creat(".configure", 0777);
+  dprintf(configure_fd, "%s:%s\n", ip, port);
+  close(configure_fd);
 }
 
-// TODO: check if file is null or token_read is null, etc.
-// Reads in the configuration file.
-Configure* Configure_read() {
-  char* file = Token_to_string(Token_read("./.configure"));
+// TODO: Check if file is empty
+Configure* configure_read() {
+  int configure_fd = open(".configure", O_RDONLY, 0777);
 
-  char* ip = strtok(strdup(file), ":");
-  char* port = strchr(file, ':') + 1;
+  Configure* config = configure_new();
+  config->ip = read_until(configure_fd, ':');
+  config->port = read_until(configure_fd, '\n');
 
-  Configure* config = malloc(sizeof(Configure));
-  config->ip = ip;
-  config->port = port;
+  close(configure_fd);
+
   return config;
 }

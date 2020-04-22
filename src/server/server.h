@@ -1,18 +1,13 @@
-#include "../token/token.h"
+#include "../request/request.h"
+#include "../response/response.h"
 
 #ifndef SERVER_H
 #define SERVER_H
 
-// Container for the port number
-// and the socket file descriptor.
-typedef struct {
-  int socket_fd;
-  char* port;
-} Server;
+// Opens server on port
+int server_open(char* port);
 
-typedef char* Handler(char* command, char* body);
-
-void Server_accept(Server* server, Handler* handler);
-Server* Server_create(char* port);
+// Waits for new connections. Calls `on_accept` when recieves one
+void server_wait(int server_fd, Response* (*on_accept)(Request*));
 
 #endif

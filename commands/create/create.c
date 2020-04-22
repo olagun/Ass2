@@ -1,56 +1,71 @@
-// Fails for 2 reasons - if the project name already exists on  the server or
-// the client can not communicate with the server. Otherwise,
-// the server will create a project folder with the given name, initialize a
-//.Manifest for it and send it to the client. The client will set up a local
-// version of the project folder in its current directory and should place the
-//.Manifest the server sent in it.
-
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include "../../src/client/client.h"
 #include "../../src/color/color.h"
+#include "../../src/manifest/manifest.h"
+#include "../../src/request/request.h"
+#include "../../src/response/response.h"
 
-void Create_client(char* project_name) {
-  char message[1000];
-  sprintf(message, "create:%s:", project_name);
-  char* response = Client_send(message);
+// Client
+void create_client(char* project_name) {
+  Request* request = request_new();
+  request->command_name = "create";
+  request->project_name = project_name;
+
+  Response* response = client_send(request);
+
+  if (response == NULL) {
+    printf("No response recieved\n");
+  } else {
+    FileList* filelist = response->filelist;
+    filelist_write(project_name, response->filelist);
+  }
 }
 
-char* Create_server(char* body) {
-  // there's gotta be a better way to append strings...
-  char* project_name = strtok(strdup(body), ":");
+// Server
+Response* create_server(Request* request) {
+  int project_name_length = strlen(request->project_name);
 
-  char* project_path = malloc(strlen("projects/") + strlen(project_name) + 1);
-  strcpy(project_path, "projects/");
-  strcat(project_path, project_name);
+  char* project_path = calloc(project_name_length + 50, sizeof(char));
+  char* manifest_path = calloc(project_name_length + 50, sizeof(char));
 
-  char* manifest_path = malloc(strlen("projects/") + strlen(project_name) +
-                               strlen(".Manifest") + 1);
-  strcpy(manifest_path, "projects/");
-  strcat(manifest_path, project_name);
-  strcat(manifest_path, "/.Manifest");
+  sprintf(project_path, "projects/%s", request->project_name);
+  sprintf(manifest_path, "projects/%s/.Manifest", request->project_name);
 
   // Create project folder
   if (mkdir(project_path, 0777) < 0) {
-    return "failure:";
+    return NULL;
   }
 
   // Create manifest file
   if (creat(manifest_path, 0777) < 0) {
-    return "failure:";
+    return NULL;
   }
-  // Write version number to manifest
-  Token_write(manifest_path, Token_new("0"));
 
-  printf(GRN "Success!" RESET " created project '" BLU "%s" RESET "'\n",
-         project_name);
- 
-  // should return serialized project. "created project" is a placeholder
-  // return serialize(project_name)
-  return "created project";
+  // Write version 0 to manifest
+  int manifest_fd = open(manifest_path, O_WRONLY, 0777);
+  dprintf(manifest_fd, "0\n");
+  close(manifest_fd);
+
+  // Write response
+  Response* response = response_new();
+  response->message = "Success!";
+
+  // Read back manifest files (only .Manifest should exist)
+  Manifest* manifest = manifest_read(project_path);
+
+  // Send with response
+  response->filelist = filelist_readbytes(project_path, manifest->filelist);
+
+  // Log change
+  printf("\n");
+  printf(BWHT "create " BLU "%s" RESET "\n", request->project_name);
+
+  return response;
 }

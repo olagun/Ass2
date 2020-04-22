@@ -19,7 +19,7 @@
     // //fails if name doesn't exist or client can't communicate
     // struct stat st = {0};
     // if (stat(directory, &st) == -1) {  //replace some directory with actual pathname
-    //     if(Server_create(8000) == NULL){ //how to access actualt port #
+    //     if(server_open(8000) == NULL){ //how to access actualt port #
     //         printf("%s", "destroy command failed");
     //     }
     // }

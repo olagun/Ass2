@@ -6,21 +6,20 @@
 #include <string.h>
 #include <unistd.h>
 
-Token* Token_new(char* token) {
-  Token* new = malloc(sizeof(Token));
+Token* token_new(char* token) {
+  Token* new = calloc(1, sizeof(Token));
   new->token = strdup(token);
-  new->next = NULL;
   return new;
 }
 
-int Token_size(Token* head) {
+int token_size(Token* head) {
   if (head == NULL) return 0;
-  return 1 + Token_size(head->next);
+  return 1 + token_size(head->next);
 }
 
-char* Token_to_string(Token* head) {
-  int length = Token_size(head);
-  char* string = malloc(sizeof(char) * length + 1);
+char* token_string(Token* head) {
+  int length = token_size(head);
+  char* string = calloc(length + 1, sizeof(char));
 
   int index = 0;
   while (head != NULL) {
@@ -39,7 +38,7 @@ void Token_print(Token* token) {
   Token_print(token->next);
 }
 
-void Token_write(char* filename, Token* head) {
+void token_write(char* filename, Token* head) {
   if (head == NULL) return;
   int write_fd = creat(filename, 0777);
 
@@ -51,14 +50,14 @@ void Token_write(char* filename, Token* head) {
   close(write_fd);
 }
 
-Token* Token_append(Token* head, Token* token) {
+Token* token_append(Token* head, Token* token) {
   if (head == NULL) return token;
-  head->next = Token_append(head->next, token);
+  head->next = token_append(head->next, token);
   return head;
 }
 
-// reads a file into a linked list
-Token* Token_read(char* filename) {
+// Reads a file into a linked list
+Token* token_read(char* filename) {
   if (filename == NULL) return NULL;
 
   int fd = open(filename, O_RDONLY, 0777);
@@ -66,8 +65,8 @@ Token* Token_read(char* filename) {
   Token* head = NULL;
   char* buffer = malloc(sizeof(char) * 2);
   while (read(fd, buffer, 1) > 0) {
-    Token* token = Token_new(buffer);
-    head = Token_append(head, token);
+    Token* token = token_new(buffer);
+    head = token_append(head, token);
   }
 
   return head;

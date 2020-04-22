@@ -10,47 +10,42 @@
 
 #include "../color/color.h"
 #include "../configure/configure.h"
+#include "../request/request.h"
+#include "../response/response.h"
 #include "../token/token.h"
 
-// Returns a linked list containing the response.
-char* Client_send(char* message) {
-  Configure* config = Configure_read();
+Response* client_send(Request* request) {
+  int client_fd = client_open();
 
-  // `addrinfo` settings.
+  request_write(client_fd, request);              // Write request
+  Response* response = response_read(client_fd);  // Read response
+
+  close(client_fd);
+  return response;
+}
+
+int client_open() {
+  Configure* config = configure_read();
+
+  // `addrinfo` settings
   struct addrinfo hints;
   memset(&hints, 0, sizeof(struct addrinfo));
-  hints.ai_family = AF_INET;        // Use IPv4.
-  hints.ai_socktype = SOCK_STREAM;  // Use TCP.
+  hints.ai_family = AF_INET;        // Use IPv4
+  hints.ai_socktype = SOCK_STREAM;  // Use TCP
 
-  // Convert URL/Port into IP.
+  // Convert URL/Port into IP
   struct addrinfo* result;
   if (getaddrinfo(config->ip, config->port, &hints, &result) != 0) {
-    // Could not find server.
-    return NULL;
+    return -1;
   }
 
-  // Create socket to add connection to it.
+  // Create socket
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+
+  // Add connection to it
   if (connect(socket_fd, result->ai_addr, result->ai_addrlen) != 0) {
-    // Could not connect to server.
-    return NULL;
+    return -1;
   }
 
-  // Send message.
-  write(socket_fd, message, strlen(message) + 1);  // - write -
-  printf("Sent '" BLU "%s" RESET "' to the server\n", message);
-
-  // Reads response into linked list.
-  char* buffer = malloc(sizeof(char) * 2);
-  memset(buffer, '\0', 2);
-  Token* head = NULL;
-  while (read(socket_fd, buffer, 1) > 0) {  // - read -
-    Token* token = Token_new(buffer);
-    head = Token_append(head, token);
-  }
-  close(socket_fd);
-  char* response_string = Token_to_string(head);
-  printf("Recieved '" BLU "%s" RESET "' in response\n", response_string);
-
-  return Token_to_string(head);
+  return socket_fd;
 }
