@@ -1,5 +1,32 @@
 # Ass2
 
+## Testing the client
+
+```bash
+make build_client
+cd client
+
+# Try a command!
+./WTF create test_project
+```
+
+## Testing the server
+
+```bash
+make build_server
+cd server
+
+# Start the server
+./WTFServer 8000
+```
+
+Or, use the shortcut.
+
+```bash
+# Start the server (port 8000 by default)
+make run_server
+```
+
 ## Storing files in memory
 
 The only files read for any project are those listed in it's manifest. To send files, read in the manifest, then read file data into every file listed in the manifest.
