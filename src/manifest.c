@@ -48,3 +48,27 @@ Manifest* manifest_read(char* project_path) {
 
   return manifest;
 }
+
+// Write manifest to project path. Overwrites if already exists
+void manifest_write(char* project_path, Manifest* manifest) {
+  // Open manifest
+  char* manifest_path = calloc(strlen(project_path) + 50, sizeof(char));
+  sprintf(manifest_path, "%s/.Manifest", project_path);
+  int manifest_fd = creat(manifest_path, 0777);
+
+  // Write project version
+  dprintf(manifest_fd, "%d\n", manifest->project_version);
+
+  // Write every file except for `.Manifest`
+  FileList* item = manifest->filelist;
+  while (item != NULL) {
+    if (strcmp(".Manifest", item->file_path) != 0) {
+      // Write <file_path> <file_version> <file_hash> <file_modified> to line
+      dprintf(manifest_fd, "%s %d %s %d\n", item->file_path, item->file_version,
+              item->file_hash, item->file_modified);
+    }
+
+    item = item->next;
+  }
+  close(manifest_fd);
+}
