@@ -27,9 +27,9 @@ Manifest* manifest_read(char* project_path) {
     item->file_path = calloc(strlen(line), sizeof(char));
     item->file_hash = calloc(strlen(line), sizeof(char));
 
-    // Scan in <file_path> <file_version> <file_hash> from line
-    sscanf(line, "%s %d %s", item->file_path, &item->file_version,
-           item->file_hash);
+    // Scan in <file_path> <file_version> <file_hash> <file_modified> from line
+    sscanf(line, "%s %d %s %d", item->file_path, &item->file_version,
+           item->file_hash, &item->file_modified);
 
     // Prepend file to list
     item->next = manifest->filelist;

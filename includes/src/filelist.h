@@ -9,6 +9,7 @@ typedef struct FileList {
 
   // Manifest
   int file_version;
+  int file_modified;
   char* file_hash;
 
   struct FileList* next;
