@@ -1,0 +1,81 @@
+#include "src/response.h"
+
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#include "src/filelist.h"
+#include "src/read.h"
+#include "src/util/color.h"
+
+Response* response_new() { return calloc(1, sizeof(Response)); }
+
+// Writes response according to protocol
+void response_write(int fd, Response* response) {
+  if (response == NULL) return;
+
+  // Add file count
+  response->file_count = filelist_size(response->filelist);
+
+  // Write response
+  dprintf(fd, "%s:", response->message);     //  <message>:
+  dprintf(fd, "%d:", response->file_count);  //  <file_count>:
+
+  FileList* item = response->filelist;
+  while (item != NULL) {                           // Write every file
+    dprintf(fd, "%s:", item->file_path);           // <file_path>:
+    dprintf(fd, "%d:", item->file_size);           // <file_size>:
+    write(fd, item->file_bytes, item->file_size);  // <file_bytes>
+
+    item = item->next;
+  }
+
+  response_log(response);
+}
+
+// Reads response according to protocol
+Response* response_read(int fd) {
+  if (fd < 0) return NULL;
+
+  // Read response
+  Response* response = response_new();
+  response->message = read_until(fd, ':');           //  <message>:
+  response->file_count = atoi(read_until(fd, ':'));  //  <file_count>:
+
+  int n = response->file_count;
+  for (; n > 0; n--) {  // Read in every file
+    FileList* item = filelist_new();
+    item->file_path = read_until(fd, ':');                // <file_path>:
+    item->file_size = atoi(read_until(fd, ':'));          // <file_size>:
+    item->file_bytes = read_nbytes(fd, item->file_size);  // <file_bytes>
+
+    // Prepend file to list
+    item->next = response->filelist;
+    response->filelist = item;
+  }
+
+  response_log(response);
+
+  return response;
+}
+
+void response_log(Response* response) {
+  printf("\n");
+  printf("╭" BWHT " Response\n" RESET);
+  printf("├ message\t" BLU "%s" RESET "\n", response->message);
+  printf("├ file_count\t" BLU "%d" RESET "\n", response->file_count);
+  printf("├ files\t\n");
+
+  FileList* item = response->filelist;
+  while (item != NULL) {
+    printf("├── " BLU "%s" RESET "\n", item->file_path);
+    printf("├── file size:\t" BLU "%d" RESET "\n", item->file_size);
+    printf("├── file bytes:\t" YEL "$" BLU "%.*s" YEL "$" RESET "\n",
+           item->file_size, item->file_bytes);
+
+    item = item->next;
+  }
+
+  printf("╰─\n");
+}

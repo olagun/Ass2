@@ -29,7 +29,7 @@ make run_server
 
 ## Storing files in memory
 
-The only files read for any project are those listed in it's manifest. To send files, read in the manifest, then read file data into every file listed in the manifest.
+The only files read are those listed in `.Manifest`. To send files, read in the manifest, then read file data into every file listed in the manifest.
 
 ```c
 // Read in the manifest
@@ -46,7 +46,7 @@ FileList* files_with_data = filelist_readbytes("projects/test_project", manifest
 
 ## Sending files
 
-After successfuly storing files inside of a `FileList` linked list, add them to a request to send them. Open [request.h](src/request/request.h) to see what else that a request can contain.
+After successfuly storing files inside of a `FileList` linked list, add them to a request to send them. Open [request.h](src/request.h) to see what else that a request can contain.
 
 ```c
 // Read in manifest

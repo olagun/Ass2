@@ -1,6 +1,6 @@
-source_files = $(wildcard src/*/*.c)
-command_files = $(wildcard commands/*/*.c)
-openssl_flags = -lssl -lcrypto
+source_files = $(wildcard src/*.c) $(wildcard src/commands/*.c)
+gcc_flags = -I includes
+# open_ssl_flags = -lssl -lcrypto
 
 # Alias for 'build'
 all: build
@@ -15,7 +15,7 @@ clean: clean_client clean_server clean_pdf
 # moves the client executable into client folder
 build_client: clean_client
 	# Compile the client
-	gcc $(open_ssl_flags) $(source_files) $(command_files) WTFClient.c -o WTF 
+	gcc $(gcc_flags) $(source_files) wtf_client.c -o WTF 
 	# Make client folder
 	mkdir client
 	# Move the client executable
@@ -27,7 +27,7 @@ build_client: clean_client
 # moves the server executable into server folder
 build_server: clean_server
 	# Compile the server
-	gcc $(open_ssl_flags) $(source_files) $(command_files) WTFServer.c -o WTFServer
+	gcc $(gcc_flags) $(source_files) wtf_server.c -o WTFServer
 	# Make server folder
 	mkdir server
 	# Move the server executable
