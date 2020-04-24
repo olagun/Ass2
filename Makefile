@@ -57,6 +57,14 @@ clean_server:
 clean_pdf:
 	rm -f README.pdf
 
+# Tests to make dev faster
+test_create: build_client
+	cd client; ./WTF create test
+
+test_add: test_create
+	echo "example text" > client/test/example.txt
+	cd client; ./WTF add test example.txt
+
 # Makes pdf for submission
 pdf: 
 	pandoc README.md -o README.pdf

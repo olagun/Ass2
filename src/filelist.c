@@ -51,8 +51,8 @@ FileList* filelist_readbytes(char* project_name, FileList* filelist) {
 
   // Write to file
   int fd = open(full_path, O_RDONLY, 0777);
-  filelist->file_bytes = read_nbytes(fd, filelist->file_size);
   filelist->file_size = get_file_size(full_path);
+  filelist->file_bytes = read_nbytes(fd, filelist->file_size);
   close(fd);
 
   // Recurse on the rest of the list
@@ -65,6 +65,8 @@ FileList* filelist_readbytes(char* project_name, FileList* filelist) {
 // Creates new files, verwrites existing files, creates necessary
 // directories
 void filelist_write(char* project_name, FileList* filelist) {
+  if (filelist == NULL) return;
+
   // Add project folder (if it's not already there)
   int missing_folder = opendir(project_name) == NULL;
   if (missing_folder) mkdir(project_name, 0777);

@@ -10,7 +10,7 @@
 
 // Accepts and responds to client requests
 // This is where most things happen
-Response* accept(Request* request) {
+Response* on_accept(Request* request) {
   char* command_name = request->command_name;
 
   if (strcmp("create", command_name) == 0) {

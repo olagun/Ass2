@@ -4,6 +4,6 @@
 #ifndef ACCEPT_H
 #define ACCPET_H
 
-Response* accept(Request* request);
+Response* on_accept(Request* request);
 
 #endif

@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
 
   // Wait for and accept new connections forever
   while (1) {
-    server_wait(server_fd, accept);
+    server_wait(server_fd, on_accept);
   }
 
   return 0;

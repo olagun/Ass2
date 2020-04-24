@@ -25,6 +25,7 @@ char* read_until(int fd, char delim) {
   return token_string(head);
 }
 
+// TODO: Check if unsuccessful
 // Reads `n` bytes from a file descriptor
 char* read_nbytes(int fd, int n) {
   char* tmp = calloc(n + 1, sizeof(char));
