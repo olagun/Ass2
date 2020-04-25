@@ -4,6 +4,7 @@
 
 #include "src/client.h"
 #include "src/commands/add.h"
+#include "src/commands/commit.h"
 #include "src/commands/create.h"
 #include "src/commands/currentversion.h"
 #include "src/configure.h"
@@ -43,6 +44,13 @@ int main(int argc, char** argv) {
     }
 
     add_client(argv[2], argv[3]);
+  } else if (strcmp(argv[1], "commit") == 0) {
+    if (argc < 3) {
+      printf("Missing <project name>");
+      return 0;
+    }
+
+    commit_client(argv[2]);
   } else {
     printf("Flag " BLU "%s" RESET " does not exist\n", argv[1]);
   }

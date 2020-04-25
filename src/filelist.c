@@ -5,18 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #include "src/manifest.h"
 #include "src/read.h"
-
-// https://stackoverflow.com/questions/238603/how-can-i-get-a-files-size-in-c
-int get_file_size(char* filename) {
-  struct stat st;
-  stat(filename, &st);
-  return st.st_size;
-}
+#include "src/util/get_file_size.h"
 
 // Returns index of the nth `delim`
 int find_nth(char* str, char delim, int n) {
@@ -102,4 +95,10 @@ void filelist_write(char* project_name, FileList* filelist) {
 
     item = item->next;
   }
+}
+
+FileList* filelist_append(FileList* filelist, FileList* item) {
+  if (filelist == NULL) return item;
+  filelist->next = filelist_append(filelist->next, item);
+  return filelist;
 }

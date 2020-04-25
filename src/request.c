@@ -50,9 +50,8 @@ Request* request_read(int fd) {
     item->file_size = atoi(read_until(fd, ':'));          // <file_size>:
     item->file_bytes = read_nbytes(fd, item->file_size);  // <file_bytes>
 
-    // Prepend file to list
-    item->next = request->filelist;
-    request->filelist = item;
+    // Append item to list
+    request->filelist = filelist_append(request->filelist, item);
   }
 
   request_log(request);

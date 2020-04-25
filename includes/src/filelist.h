@@ -26,4 +26,7 @@ FileList* filelist_readbytes(char* project_name, FileList* filelist);
 // directories
 void filelist_write(char* project_name, FileList* filelist);
 
+// Append a file list item to a file list
+FileList* filelist_append(FileList* filelist, FileList* item);
+
 #endif

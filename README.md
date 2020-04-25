@@ -84,6 +84,7 @@ source ~/.bash_profile
 
 ```md
 <message>:
+<status_code>:
 <file_count>:
 <file_path>:
 <file_size>:

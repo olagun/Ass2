@@ -19,8 +19,9 @@ void response_write(int fd, Response* response) {
   response->file_count = filelist_size(response->filelist);
 
   // Write response
-  dprintf(fd, "%s:", response->message);     //  <message>:
-  dprintf(fd, "%d:", response->file_count);  //  <file_count>:
+  dprintf(fd, "%s:", response->message);      //  <message>:
+  dprintf(fd, "%d:", response->status_code);  //  <status_code>:
+  dprintf(fd, "%d:", response->file_count);   //  <file_count>:
 
   FileList* item = response->filelist;
   while (item != NULL) {                           // Write every file
@@ -40,8 +41,9 @@ Response* response_read(int fd) {
 
   // Read response
   Response* response = response_new();
-  response->message = read_until(fd, ':');           //  <message>:
-  response->file_count = atoi(read_until(fd, ':'));  //  <file_count>:
+  response->message = read_until(fd, ':');            //  <message>:
+  response->status_code = atoi(read_until(fd, ':'));  //  <status_code>:
+  response->file_count = atoi(read_until(fd, ':'));   //  <file_count>:
 
   int n = response->file_count;
   for (; n > 0; n--) {  // Read in every file
@@ -50,9 +52,8 @@ Response* response_read(int fd) {
     item->file_size = atoi(read_until(fd, ':'));          // <file_size>:
     item->file_bytes = read_nbytes(fd, item->file_size);  // <file_bytes>
 
-    // Prepend file to list
-    item->next = response->filelist;
-    response->filelist = item;
+    // Append item to list
+    response->filelist = filelist_append(response->filelist, item);
   }
 
   response_log(response);

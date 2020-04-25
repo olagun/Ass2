@@ -31,9 +31,8 @@ Manifest* manifest_read(char* project_path) {
     sscanf(line, "%s %d %s %d", item->file_path, &item->file_version,
            item->file_hash, &item->file_modified);
 
-    // Prepend file to list
-    item->next = manifest->filelist;
-    manifest->filelist = item;
+    // Append item to list
+    manifest->filelist = filelist_append(manifest->filelist, item);
   }
   close(manifest_fd);
 

@@ -8,6 +8,9 @@ typedef struct Response {
   // Message
   char* message;
 
+  // Status Code (A number, like errno, indicating what happened)
+  int status_code;
+
   // Files
   int file_count;
   FileList* filelist;

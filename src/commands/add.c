@@ -1,20 +1,13 @@
 #include <fcntl.h>
 #include <openssl/sha.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #include "src/filelist.h"
 #include "src/manifest.h"
-
-// https://stackoverflow.com/questions/230062/whats-the-best-way-to-check-if-a-file-exists-in-c
-bool file_exists(char* filename) {
-  struct stat buffer;
-  return (stat(filename, &buffer) == 0);
-}
+#include "src/util/file_exists.h"
 
 void add_client(char* project_name, char* file_path) {
   // Concatentate project name and file path

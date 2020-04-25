@@ -1,4 +1,4 @@
-source_files = $(wildcard src/*.c) $(wildcard src/commands/*.c)
+source_files = $(wildcard src/*.c) $(wildcard src/commands/*.c) $(wildcard src/util/*.c)
 
 # Look for #include inside the "includes/" folder
 include_flags = -I includes/

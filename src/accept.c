@@ -5,6 +5,7 @@
 
 #include "src/commands/create.h"
 #include "src/commands/currentversion.h"
+#include "src/commands/commit.h"
 #include "src/request.h"
 #include "src/response.h"
 
@@ -19,6 +20,10 @@ Response* on_accept(Request* request) {
 
   if (strcmp("currentversion", command_name) == 0) {
     return currentversion_server(request);
+  }
+
+  if (strcmp("commit", command_name) == 0) {
+    return commit_server(request);
   }
 
   // if (strcmp("<command_name>", command) == 0) {
