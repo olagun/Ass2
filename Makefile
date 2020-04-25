@@ -65,6 +65,12 @@ test_add: test_create
 	echo "example text" > client/test/example.txt
 	cd client; ./WTF add test example.txt
 
+test_commit_add: test_add
+	cd client; ./WTF commit test
+
+# test_commit_remove:
+# test_commit_modify:
+
 # Makes pdf for submission
 pdf: 
 	pandoc README.md -o README.pdf
