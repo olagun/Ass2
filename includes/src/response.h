@@ -1,17 +1,16 @@
 #include "src/filelist.h"
+#include "src/manifest.h"
 
 #ifndef RESPONSE_H
 #define RESPONSE_H
 
 // Server response
 typedef struct Response {
-  // Message
   char* message;
-
-  // Status Code (A number, like errno, indicating what happened)
   int status_code;
 
-  // Files
+  // Manifest
+  int project_version;
   int file_count;
   FileList* filelist;
 } Response;

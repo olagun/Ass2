@@ -15,6 +15,8 @@ void request_write(int fd, Request* request) {
 
   request->file_count = filelist_size(request->filelist);
 
+  dprintf(fd, "%s:", request->message);          // <message>:
+  dprintf(fd, "%d:", request->status_code);      // <status_code>:
   dprintf(fd, "%s:", request->command_name);     // <command_name>:
   dprintf(fd, "%s:", request->project_name);     // <project_name>:
   dprintf(fd, "%d:", request->project_version);  // <project_version>:
@@ -23,6 +25,8 @@ void request_write(int fd, Request* request) {
   FileList* item = request->filelist;
   while (item != NULL) {
     dprintf(fd, "%s:", item->file_path);           // <file_path>:
+    dprintf(fd, "%d:", item->file_version);        // <file_version>:
+    dprintf(fd, "%s:", item->file_hash);           // <file_hash>:
     dprintf(fd, "%d:", item->file_size);           // <file_size>:
     write(fd, item->file_bytes, item->file_size);  // <file_bytes>
 
@@ -38,6 +42,8 @@ Request* request_read(int fd) {
 
   // Read response
   Request* request = request_new();
+  request->message = read_until(fd, ':');                // <message>:
+  request->status_code = atoi(read_until(fd, ':'));      // <status_code>:
   request->command_name = read_until(fd, ':');           // <command_name>:
   request->project_name = read_until(fd, ':');           // <project_name>:
   request->project_version = atoi(read_until(fd, ':'));  // <project_version>:
@@ -47,6 +53,8 @@ Request* request_read(int fd) {
   for (; n > 0; n--) {  // Read in every file
     FileList* item = filelist_new();
     item->file_path = read_until(fd, ':');                // <file_path>:
+    item->file_version = atoi(read_until(fd, ':'));       // <file_version>:
+    item->file_hash = read_until(fd, ':');                // <file_hash>:
     item->file_size = atoi(read_until(fd, ':'));          // <file_size>:
     item->file_bytes = read_nbytes(fd, item->file_size);  // <file_bytes>
 

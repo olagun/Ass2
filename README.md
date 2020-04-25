@@ -85,8 +85,12 @@ source ~/.bash_profile
 ```md
 <message>:
 <status_code>:
+
+<project_version>:
 <file_count>:
 <file_path>:
+<file_version>:
+<file_hash>:
 <file_size>:
 <file_bytes>
 ```
@@ -94,11 +98,17 @@ source ~/.bash_profile
 ### Request Protocol
 
 ```md
+<message>:
+<status_code>:
+
 <command_name>:
 <project_name>:
+
 <project_version>:
 <file_count>:
 <file_path>:
+<file_version>:
+<file_hash>:
 <file_size>:
 <file_bytes>
 ```

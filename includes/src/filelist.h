@@ -3,14 +3,13 @@
 
 // Linked list of files
 typedef struct FileList {
+  int file_removed;  // Set if file was removed locally
+
   char* file_path;
+  int file_version;
+  char* file_hash;
   int file_size;     // Number of bytes in file
   char* file_bytes;  // Contents of file
-
-  // Manifest
-  int file_version;
-  int file_modified;
-  char* file_hash;
 
   struct FileList* next;
 } FileList;

@@ -6,9 +6,22 @@
 
 #include "src/client.h"
 #include "src/util/directory_exists.h"
+#include "src/util/file_exists.h"
 #include "src/util/get_file_size.h"
 
 void commit_client(char* project_name) {
+  char* update_path = calloc(strlen(project_name) + 50, sizeof(char));
+  sprintf(update_path, "projects/%s/.Update", project_name);
+
+  char* conflict_path = calloc(strlen(project_name) + 50, sizeof(char));
+  sprintf(conflict_path, "projects/%s/.Conflict", project_name);
+
+  if ((file_exists(update_path) && get_file_size(update_path) > 0) ||
+      file_exists(conflict_path)) {
+    printf("Contains .Update or .Conflict file. Could not be commit\n");
+    return;
+  }
+
   Request* request = request_new();
   request->command_name = "commit";
   request->project_name = project_name;

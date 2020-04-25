@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     create_client(argv[2]);
   } else if (strcmp(argv[1], "currentversion") == 0) {
     if (argc < 3) {
-      printf("Missing <project version>");
+      printf("Missing <project name>");
       return 0;
     }
 

@@ -10,6 +10,7 @@ void currentversion_client(char* project_name) {
   // Create request
   Request* request = request_new();
   request->command_name = "currentversion";
+  request->project_name = project_name;
 
   // Send request
   Response* response = client_send(request);
@@ -17,10 +18,8 @@ void currentversion_client(char* project_name) {
   // Print files in response
   FileList* item = response->filelist;
   while (item != NULL) {
-    if (strcmp(".Manifest", item->file_path) != 0) {
-      printf("file_path: %s/%s\n", project_name, item->file_path);
-      printf("file_version: %s/%d\n", project_name, item->file_version);
-    }
+    printf("file_path: %s/%s\n", project_name, item->file_path);
+    printf("file_version: %s/%d\n", project_name, item->file_version);
 
     item = item->next;
   }

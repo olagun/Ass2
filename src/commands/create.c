@@ -25,7 +25,15 @@ void create_client(char* project_name) {
     printf("No response recieved\n");
   } else {
     FileList* filelist = response->filelist;
+
+    // Write files
     filelist_write(project_name, response->filelist);
+
+    // Write manifest
+    Manifest* manifest = manifest_new();
+    manifest->filelist = response->filelist;
+    manifest->project_version = response->project_version;
+    manifest_write(project_name, manifest);
   }
 }
 
@@ -48,12 +56,13 @@ Response* create_server(Request* request) {
   dprintf(manifest_fd, "0\n");  // Write version number
   close(manifest_fd);
 
-  // Get files in manifest (only .Manifest should exist)
-  Manifest* manifest = manifest_read(project_path);
-
   // Write response
   Response* response = response_new();
   response->message = "Success!";
+
+  // Get files in manifest (only .Manifest should exist)
+  Manifest* manifest = manifest_read(project_path);
+  response->project_version = manifest->project_version;
   response->filelist = filelist_readbytes(project_path, manifest->filelist);
 
   // Log

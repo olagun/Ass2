@@ -5,11 +5,14 @@
 
 // Client request
 typedef struct Request {
-  char* command_name;   // Command
-  char* project_name;   // Project
-  int project_version;  // Project version (Used for rollback)
+  char* message;
+  int status_code;
 
-  // Files
+  char* command_name;
+  char* project_name;
+
+  // Manifest
+  int project_version;
   int file_count;
   FileList* filelist;
 } Request;
