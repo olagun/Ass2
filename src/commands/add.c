@@ -1,5 +1,4 @@
 #include <fcntl.h>
-#include <openssl/sha.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +7,7 @@
 #include "src/filelist.h"
 #include "src/manifest.h"
 #include "src/util/file_exists.h"
+#include "src/util/get_file_hash.h"
 
 void add_client(char* project_name, char* file_path) {
   // Concatentate project name and file path
@@ -19,28 +19,6 @@ void add_client(char* project_name, char* file_path) {
     printf("Add Error: Can't add a file that doesn't exist.");
     return;
   }
-
-  // Read in the file
-  FileList* filelist = filelist_new();
-  filelist->file_path = file_path;
-  filelist = filelist_readbytes(project_name, filelist);
-
-  // Get the file hash
-  // https://rosettacode.org/wiki/SHA-256#C
-  char* file_bytes = filelist->file_bytes;
-  int file_size = filelist->file_size;
-
-  unsigned char* raw_hash =
-      SHA256((unsigned const char*)file_bytes, file_size, 0);
-  char* hex_hash = calloc(SHA256_DIGEST_LENGTH * 2 + 1, sizeof(char));
-
-  int i = 0;
-  for (; i < SHA256_DIGEST_LENGTH; i++) {
-    // Print two hex chars (0x00) for every byte
-    sprintf(hex_hash + 2 * i, "%02x", raw_hash[i]);
-  }
-
-  filelist->file_hash = hex_hash;
 
   // Read in project's `.Manifest`
   Manifest* manifest = manifest_read(project_name);
@@ -60,6 +38,13 @@ void add_client(char* project_name, char* file_path) {
     prev = curr;
     curr = curr->next;
   }
+
+  // Append the file to manifest
+  FileList* filelist = filelist_new();
+  filelist->file_path = file_path;
+  filelist->file_hash = get_file_hash(project_name, file_path);
+  filelist->file_version = 0;
+  filelist->file_removed = 0;
 
   if (prev) {
     prev->next = filelist;

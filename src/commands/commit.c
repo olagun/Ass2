@@ -32,6 +32,14 @@ void commit_client(char* project_name) {
     printf("%s\n", response->message);
     return;
   }
+
+  Manifest* local_manifest = manifest_read(project_name);
+
+  // Exit if the versions don't match
+  if (response->project_version != local_manifest->project_version) {
+    printf("Manifest's don't match. Update your local files first.\n");
+    return;
+  }
 }
 
 Response* commit_server(Request* request) {
