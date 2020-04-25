@@ -13,7 +13,10 @@ Response* response_new() { return calloc(1, sizeof(Response)); }
 
 // Writes response according to protocol
 void response_write(int fd, Response* response) {
-  if (response == NULL) return;
+  if (response == NULL) {
+    response_log(response);
+    return;
+  }
 
   // Add file count
   response->file_count = filelist_size(response->filelist);
@@ -40,7 +43,10 @@ void response_write(int fd, Response* response) {
 
 // Reads response according to protocol
 Response* response_read(int fd) {
-  if (fd < 0) return NULL;
+  if (fd < 0) {
+    response_log(NULL);
+    return NULL;
+  }
 
   // Read response
   Response* response = response_new();
@@ -70,18 +76,21 @@ Response* response_read(int fd) {
 void response_log(Response* response) {
   printf("\n");
   printf("╭" BWHT " Response\n" RESET);
-  printf("├ message\t" BLU "%s" RESET "\n", response->message);
-  printf("├ file_count\t" BLU "%d" RESET "\n", response->file_count);
-  printf("├ files\t\n");
 
-  FileList* item = response->filelist;
-  while (item != NULL) {
-    printf("├── " BLU "%s" RESET "\n", item->file_path);
-    printf("├── file size:\t" BLU "%d" RESET "\n", item->file_size);
-    printf("├── file bytes:\t" YEL "$" BLU "%.*s" YEL "$" RESET "\n",
-           item->file_size, item->file_bytes);
+  if (response != NULL) {
+    printf("├ message\t" BLU "%s" RESET "\n", response->message);
+    printf("├ file_count\t" BLU "%d" RESET "\n", response->file_count);
+    printf("├ files\t\n");
 
-    item = item->next;
+    FileList* item = response->filelist;
+    while (item != NULL) {
+      printf("├── " BLU "%s" RESET "\n", item->file_path);
+      printf("├── file size:\t" BLU "%d" RESET "\n", item->file_size);
+      printf("├── file bytes:\t" YEL "$" BLU "%.*s" YEL "$" RESET "\n",
+             item->file_size, item->file_bytes);
+
+      item = item->next;
+    }
   }
 
   printf("╰─\n");

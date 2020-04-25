@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,10 +22,12 @@ void create_client(char* project_name) {
 
   // Send request
   Response* response = client_send(request);
-  if (response == NULL) {
-    printf("No response recieved\n");
+  if (response->status_code < 0) {
+    printf("%s\n", response->message);
   } else {
     FileList* filelist = response->filelist;
+
+    mkdir(project_name, 0777);
 
     // Write files
     filelist_write(project_name, response->filelist);
@@ -48,10 +51,21 @@ Response* create_server(Request* request) {
   sprintf(manifest_path, "projects/%s/.Manifest", request->project_name);
 
   // Create project folder
-  if (mkdir(project_path, 0777) < 0) return NULL;
+  if (mkdir(project_path, 0777) < 0) {
+    Response* response = response_new();
+    response->status_code = -1;
+    response->message = errno == EEXIST ? "Project folder already exists"
+                                        : "Couldn't create a project folder";
+    return response;
+  }
 
   // Create manifest file and write version number
-  if (creat(manifest_path, 0777) < 0) return NULL;
+  if (creat(manifest_path, 0777) < 0) {
+    Response* response = response_new();
+    response->status_code = -1;
+    response->message = "Couldn't create a manifest folder";
+    return response;
+  }
   int manifest_fd = creat(manifest_path, 0777);
   dprintf(manifest_fd, "0\n");  // Write version number
   close(manifest_fd);

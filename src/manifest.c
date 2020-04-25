@@ -43,9 +43,12 @@ Manifest* manifest_read(char* project_path) {
 
 // Write manifest to project path. Overwrites if already exists
 void manifest_write(char* project_path, Manifest* manifest) {
-  // Add project folder (if it's not already there)
+  // Error if project path doesn't exist
   int missing_folder = opendir(project_path) == NULL;
-  if (missing_folder) mkdir(project_path, 0777);
+  if (missing_folder) {
+    printf("Can't write manifest to non-existent project\n");
+    return;
+  }
 
   // Open manifest
   char* manifest_path = calloc(strlen(project_path) + 50, sizeof(char));

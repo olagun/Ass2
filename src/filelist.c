@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "src/manifest.h"
 #include "src/read.h"
@@ -61,9 +61,12 @@ FileList* filelist_readbytes(char* project_name, FileList* filelist) {
 void filelist_write(char* project_name, FileList* filelist) {
   if (filelist == NULL) return;
 
-  // Add project folder (if it's not already there)
+  // Error if project path doesn't exist
   int missing_folder = opendir(project_name) == NULL;
-  if (missing_folder) mkdir(project_name, 0777);
+  if (missing_folder) {
+    printf("Can't write files to a non-existent project\n");
+    return;
+  }
 
   // Add every file
   FileList* item = filelist;

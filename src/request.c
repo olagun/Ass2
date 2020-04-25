@@ -11,7 +11,10 @@ Request* request_new() { return calloc(1, sizeof(Request)); }
 
 // Writes request according to protocol
 void request_write(int fd, Request* request) {
-  if (request == NULL) return;
+  if (request == NULL) {
+    request_log(request);
+    return;
+  }
 
   request->file_count = filelist_size(request->filelist);
 
@@ -38,7 +41,10 @@ void request_write(int fd, Request* request) {
 
 // Reads request according to protocol
 Request* request_read(int fd) {
-  if (fd < 0) return NULL;
+  if (fd < 0) {
+    request_log(NULL);
+    return NULL;
+  }
 
   // Read response
   Request* request = request_new();
@@ -70,20 +76,23 @@ Request* request_read(int fd) {
 void request_log(Request* request) {
   printf("\n");
   printf("╭" BWHT " Request" RESET "\n");
-  printf("├ command_name\t" BLU "%s" RESET "\n", request->command_name);
-  printf("├ project_name\t" BLU "%s" RESET "\n", request->project_name);
-  printf("├ version\t" BLU "%d" RESET "\n", request->project_version);
-  printf("├ file_count\t" BLU "%d" RESET "\n", request->file_count);
-  printf("├ files\t\n");
 
-  FileList* item = request->filelist;
-  while (item != NULL) {
-    printf("├── " BLU "%s" RESET "\n", item->file_path);
-    printf("├── file size:\t" BLU "%d" RESET "\n", item->file_size);
-    printf("├── file bytes:\t" YEL "$" BLU "%.*s" YEL "$" RESET "\n",
-           item->file_size, item->file_bytes);
+  if (request != NULL) {
+    printf("├ command_name\t" BLU "%s" RESET "\n", request->command_name);
+    printf("├ project_name\t" BLU "%s" RESET "\n", request->project_name);
+    printf("├ version\t" BLU "%d" RESET "\n", request->project_version);
+    printf("├ file_count\t" BLU "%d" RESET "\n", request->file_count);
+    printf("├ files\t\n");
 
-    item = item->next;
+    FileList* item = request->filelist;
+    while (item != NULL) {
+      printf("├── " BLU "%s" RESET "\n", item->file_path);
+      printf("├── file size:\t" BLU "%d" RESET "\n", item->file_size);
+      printf("├── file bytes:\t" YEL "$" BLU "%.*s" YEL "$" RESET "\n",
+             item->file_size, item->file_bytes);
+
+      item = item->next;
+    }
   }
 
   printf("╰─\n");
