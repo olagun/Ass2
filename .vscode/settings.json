@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "response.h": "c",
+        "get_file_hash.h": "c"
+    }
+}
