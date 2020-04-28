@@ -1,7 +1,7 @@
 source_files = $(wildcard src/*.c) $(wildcard src/commands/*.c) $(wildcard src/util/*.c)
 
 # Look for #include inside the "includes/" folder
-include_flags = -I includes/
+include_flags = -I includes/ -I /usr/local/opt/openssl/include/ 
 
 # Adds OpenSSL SHA256
 # Use this for the iLab
@@ -18,6 +18,16 @@ build: build_client build_server
 
 # Removes both client and server folder
 clean: clean_client clean_server clean_pdf
+
+# DOES NOT Remove the client folder if it exists, compiles the client, and 
+# moves the client executable into client folder
+client: 
+	# Compile the client
+	gcc $(include_flags) $(source_files) wtf_client.c -o WTF $(open_ssl_flags)
+	# Move the client executable
+	mv WTF client
+	# Run 'configure' beforehand
+	cd client; ./WTF configure 127.0.0.1 8000
 
 # Removes the client folder if it exists, compiles the client, and 
 # moves the client executable into client folder
@@ -63,7 +73,9 @@ test_create: build_client
 
 test_add: test_create
 	echo "example text" > client/test/example.txt
-	cd client; ./WTF add test example.txt
+	echo "example2 text" > client/test/example2.txt
+	echo "example3 text" > client/test/example3.txt
+	cd client; ./WTF add test example.txt; ./WTF add test example2.txt; ./WTF add test example3.txt
 
 test_commit_add: test_add
 	cd client; ./WTF commit test

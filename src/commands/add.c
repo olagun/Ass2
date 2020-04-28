@@ -16,7 +16,7 @@ void add_client(char* project_name, char* file_path) {
   sprintf(full_path, "%s/%s", project_name, file_path);
 
   if (!file_exists(full_path)) {
-    printf("Add Error: Can't add a file that doesn't exist.");
+    printf("Add Error: Can't add a file that doesn't exist.\n");
     return;
   }
 

@@ -1,4 +1,6 @@
-#include <openssl/sha.h>
+//#include <openssl/sha.h>
+//#include <./Documents/Code/anaconda3/pkgs/openssl-1.1.1d-h1de35cc_2/include/openssl/sha.h>
+#include </usr/local/opt/openssl/include/openssl/sha.h>
 #include <stdlib.h>
 #include <stdio.h>
 

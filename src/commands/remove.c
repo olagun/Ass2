@@ -8,77 +8,51 @@
 #include "src/manifest.h"
 #include "src/util/file_exists.h"
 #include "src/util/get_file_hash.h"
-// #include <openssl/md5.h>
+//include <openssl/md5.h>
 
+int remove_client(char *project_name, char *file_path)
+{
 
-
-int remove_client(char* project_name, char* file_path){
-    //will remove the entry for the given file from its own .Manifest
+    // Concatentate project name and file path
     int full_path_len = strlen(file_path) + strlen(project_name);
+    char* full_path = calloc(full_path_len + 50, sizeof(char));
+    sprintf(full_path, "%s/%s", project_name, file_path);
 
-    char pj[full_path_len];
-    bzero(pj, full_path_len);
-    sprintf(pj, "%s/.manifest", project_name);
-    int length = strlen(file_path) + strlen(project_name) + 2;
-    char name[length];
-    bzero(name, length);
-    sprintf(name, "%s/%s", project_name, file_path);
+    if (!file_exists(full_path)) {
+        printf("Remove Error: Can't remove a file that doesn't exist.\n");
+        return -1;
+    }
 
-    int fd = open(pj, O_RDWR, 00600);
-
-    //error in opening file
-    if (fd == -1)
+    //the file exists, delete the file
+    int status;
+    status = remove(full_path);
+    if (status == 0)
+        printf("%s file deleted successfully.\n", file_path);
+    else
     {
-        fprintf(stderr, "[_remove] Error opening %s. FILE: %s. LINE: %d.\n", pj, __FILE__, __LINE__);
-        return 1;
+        printf("Unable to delete file %s\n", file_path);
+        perror("Following error occurred");
     }
 
-    //file doesn't exist
-    if (!file_exists(file_path)) {
-        printf("Remove Error: Can't remove a file that doesn't exist.");
-        return;
-    }
+    // Read in project's `.Manifest`
+    Manifest *manifest = manifest_read(project_name);
 
-    int size = lseek(fd, 0, SEEK_END);
-    lseek(fd, 0, SEEK_SET);
-    char buf[size+1];
-    if (better_read(fd, buf, size, __FILE__, __LINE__) != 1)
-            return 1;
-    close(fd);
-    buf[size]='\0'; /* add string termination so that substring search doesn't look further than end of file */
-    // printf("pj: %s\nbuf: %s\n", name, buf);
-    char * line = strstr(buf, name);
-    // printf("%s\n", line);
-    if (line == NULL)
+    FileList *curr = manifest->filelist;
+    FileList *prev = NULL;
+    while (curr != NULL )
     {
-        fprintf(stderr, "[_remove] (Ignore if adding...) %s not in manifest. FILE: %s. LINE: %d.\n", file_path, __FILE__, __LINE__);
-        return 1;
-    }
-    int k = 0;
-    while (line[k--] != '\n');
-        k+=2;
-    int num_bytes = &line[k] - &buf[0];
-    int i = num_bytes;
-    int end;
-    while (buf[i] != '\n')
-        i++;
-    end = i+1;
-        
-    // printf("%d\n", num_bytes);
-    int fd1 = open(pj, O_RDWR | O_TRUNC, 00600);
-    if (fd1 == -1)
-    {
-        fprintf(stderr, "[_remove] Error opening %s. FILE: %s. LINE: %d.\n", pj, __FILE__, __LINE__);
-        return 1;
-    }
-    //if (manifest_write(project_name, manifest) != 1)
-     //   return 1;
-        
-    //if (manifest_write() != 1)
-    //    return 1;
+        // If it's already there, then set file_removed to 1  and leave
+        if (strcmp(curr->file_path, file_path) == 0)
+        {
+            curr->file_removed = 1;
 
-    close(fd1);
-    printf("[_remove] File removed successfully.\n");
-    return 0;
+            // Write to project's `.Manifest`
+            manifest_write(project_name, manifest);
+            return 0; // no error
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+    printf("Unable to delete file %s from .Manifest.\n", file_path);
+    return -1;
 }
-
