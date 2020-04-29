@@ -78,8 +78,12 @@ void request_log(Request* request) {
   printf("╭" BWHT " Request" RESET "\n");
 
   if (request != NULL) {
+    printf("├ message\t" BLU "%s" RESET "\n", request->message);
+    printf("├ status_code\t" BLU "%d" RESET "\n", request->status_code);
+
     printf("├ command_name\t" BLU "%s" RESET "\n", request->command_name);
     printf("├ project_name\t" BLU "%s" RESET "\n", request->project_name);
+
     printf("├ version\t" BLU "%d" RESET "\n", request->project_version);
     printf("├ file_count\t" BLU "%d" RESET "\n", request->file_count);
     printf("├ files\t\n");

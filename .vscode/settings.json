@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "response.h": "c",
-        "get_file_hash.h": "c"
-    },
-    "terminal.integrated.fontSize": 10
-}

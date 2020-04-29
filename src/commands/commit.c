@@ -106,7 +106,7 @@ void commit_client(char* project_name) {
 
   // Add hash to uniquely identify the commit
   char* commit_hash = get_file_hash(project_name, ".Commit");
-  char* commit_filepath = calloc(strlen(project_name) + 50, sizeof(char));
+  char* commit_filepath = calloc(strlen(commit_hash) + 50, sizeof(char));
   sprintf(commit_filepath, ".Commit_%s", commit_hash);
   commit_file->file_path = commit_filepath;
 
@@ -132,6 +132,13 @@ Response* commit_server(Request* request) {
   }
 
   if (request->status_code == send_commit) {
+
+    // Write commit to commits/<project_name>/.Commit_<commit_hash>
+    // char* commit_directory =
+    //     calloc(strlen(request->project_name) + 50, sizeof(char));
+    // sprintf(commit_directory, "commits/%s", request->project_name);
+    // // mkdir(commit_directory, 0777);
+
     FileList* commit_file = request->filelist;
     filelist_write("commits", commit_file);
   }

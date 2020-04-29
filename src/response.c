@@ -79,9 +79,11 @@ void response_log(Response* response) {
 
   if (response != NULL) {
     printf("├ message\t" BLU "%s" RESET "\n", response->message);
+    printf("├ status_code\t" BLU "%d" RESET "\n", response->status_code);
+
+    printf("├ version\t" BLU "%d" RESET "\n", response->project_version);
     printf("├ file_count\t" BLU "%d" RESET "\n", response->file_count);
     printf("├ files\t\n");
-
     FileList* item = response->filelist;
     while (item != NULL) {
       printf("├── " BLU "%s" RESET "\n", item->file_path);

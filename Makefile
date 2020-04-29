@@ -77,8 +77,11 @@ test_add: test_create
 	echo "example3 text" > client/test/example3.txt
 	cd client; ./WTF add test example.txt; ./WTF add test example2.txt; ./WTF add test example3.txt
 
-test_commit_add: test_add
+test_commit: test_add
 	cd client; ./WTF commit test
+
+test_push: test_commit
+	cd client; ./WTF push test
 
 # test_commit_remove:
 # test_commit_modify:

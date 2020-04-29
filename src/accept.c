@@ -3,9 +3,10 @@
 
 #include <string.h>
 
+#include "src/commands/commit.h"
 #include "src/commands/create.h"
 #include "src/commands/currentversion.h"
-#include "src/commands/commit.h"
+#include "src/commands/push.h"
 #include "src/request.h"
 #include "src/response.h"
 
@@ -24,6 +25,10 @@ Response* on_accept(Request* request) {
 
   if (strcmp("commit", command_name) == 0) {
     return commit_server(request);
+  }
+
+  if (strcmp("push", command_name) == 0) {
+    return push_server(request);
   }
 
   // if (strcmp("<command_name>", command) == 0) {
