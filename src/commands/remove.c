@@ -23,16 +23,16 @@ int remove_client(char *project_name, char *file_path)
         return -1;
     }
 
-    //the file exists, delete the file
-    int status;
-    status = remove(full_path);
-    if (status == 0)
-        printf("%s file deleted successfully.\n", file_path);
-    else
-    {
-        printf("Unable to delete file %s\n", file_path);
-        perror("Following error occurred");
-    }
+    // //the file exists, delete the file
+    // int status;
+    // status = remove(full_path);
+    // if (status == 0)
+    //     printf("%s file deleted successfully.\n", file_path);
+    // else
+    // {
+    //     printf("Unable to delete file %s\n", file_path);
+    //     perror("Following error occurred");
+    // }
 
     // Read in project's `.Manifest`
     Manifest *manifest = manifest_read(project_name);

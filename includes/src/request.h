@@ -1,7 +1,7 @@
-#include "src/filelist.h"
-
 #ifndef REQUEST_H
 #define REQUEST_H
+
+#include "src/filelist.h"
 
 // Client request
 typedef struct Request {

@@ -1,8 +1,8 @@
-#include "src/filelist.h"
-#include "src/token.h"
-
 #ifndef MANIFEST_H
 #define MANIFEST_H
+
+#include "src/filelist.h"
+#include "src/token.h"
 
 typedef struct Manifest {
   int project_version;

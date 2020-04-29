@@ -3,7 +3,7 @@
 
 // Linked list of files
 typedef struct FileList {
-  int file_removed;  // Set if file was removed locally
+  int file_removed;  // Set to 1 if file was removed locally
 
   char* file_path;
   int file_version;
