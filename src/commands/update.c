@@ -178,6 +178,17 @@ void update_client(char *project_name)
 
     //file doesn't exist locally, write to .Update file
     close(update_fd);
+
+    //if conflict exists, delete .update file, if no conflicts exist delete .conflict file.
+    if (num_conflicts > 0){
+        if(file_exists(update_path)){
+            remove(update_path);
+        }
+    } else {
+        if(file_exists(conflict_path)){
+            remove(conflict_path);
+        }
+    }
 }
 
 FileList *get_file_from(FileList *file_list, char *in_file_path)
