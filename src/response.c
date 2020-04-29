@@ -88,8 +88,13 @@ void response_log(Response* response) {
     while (item != NULL) {
       printf("├── " BLU "%s" RESET "\n", item->file_path);
       printf("├── file size:\t" BLU "%d" RESET "\n", item->file_size);
-      printf("├── file bytes:\t" YEL "$" BLU "%.*s" YEL "$" RESET "\n",
-             item->file_size, item->file_bytes);
+
+      if (item->file_size < 100) {
+        printf("├── file bytes:\t" YEL "$" BLU "%.*s" YEL "$" RESET "\n",
+               item->file_size, item->file_bytes);
+      } else {
+        printf("├── file bytes:\tfile too large too print\n");
+      }
 
       item = item->next;
     }

@@ -54,7 +54,6 @@ void push_client(char* project_name) {
   }
 
   char* commit_path = calloc(strlen(project_name) + 50, sizeof(char));
-  // TODO(Sam): Add hash to history
   sprintf(commit_path, "%s/.Commit", project_name);
   remove(commit_path);
 }
@@ -102,8 +101,8 @@ Response* push_server(Request* request) {
     // Copy files into history
     char* system_call = calloc(strlen(project_name) + 50, sizeof(char));
     // TODO(Sam): Add hash to history
-    sprintf(system_call, "mv projects/%s history/%s", project_name,
-            project_name);
+    sprintf(system_call, "mv projects/%s history/%s_%d", project_name,
+            project_name, request->project_version);
     system(system_call);
 
     char* project_path = calloc(strlen(project_name) + 50, sizeof(char));

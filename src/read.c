@@ -25,10 +25,20 @@ char* read_until(int fd, char delim) {
   return token_string(head);
 }
 
-// TODO: Check if unsuccessful
 // Reads `n` bytes from a file descriptor
 char* read_nbytes(int fd, int n) {
   char* tmp = calloc(n + 1, sizeof(char));
-  read(fd, tmp, n);
+  int bytes_read = 0;
+  int total_read = 0;
+
+  while (total_read < n && (bytes_read = read(fd, tmp + total_read, n)) > 0) {
+    total_read = total_read + bytes_read;
+  }
+
+  int bytes_missing = n - total_read;
+  if (bytes_missing > 0) {
+    printf("%d bytes were not read from fd %d\n", n - total_read, fd);
+  }
+
   return tmp;
 }

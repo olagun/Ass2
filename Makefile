@@ -89,7 +89,7 @@ test_commit: test_add
 	cd client; ./WTF commit test
 
 test_push: test_commit
-	cd client; ./WTF commit test
+	cd client; ./WTF push test
 
 test_update:
 	cd client; ./WTF update test
