@@ -51,6 +51,14 @@ build_server: clean_server
 	# Move the server executable
 	mv WTFServer server
 
+# Just RUN the server
+run_server2: 
+	cd server/projects; cp -R /Users/MaanyaTandon/Documents/Code/Systems/Ass2/client/test .
+	cd server; ./WTFServer 8000
+
+# Build then run the server
+# copy_to_server:
+
 # Build then run the server
 run_server: build_server
 	cd server; ./WTFServer 8000
@@ -72,13 +80,16 @@ test_create: build_client
 	cd client; ./WTF create test
 
 test_add: test_create
-	echo "example text" > client/test/example.txt
+	echo "example text"  > client/test/example.txt
 	echo "example2 text" > client/test/example2.txt
 	echo "example3 text" > client/test/example3.txt
 	cd client; ./WTF add test example.txt; ./WTF add test example2.txt; ./WTF add test example3.txt
 
 test_commit_add: test_add
 	cd client; ./WTF commit test
+
+test_update: 
+	cd client; ./WTF update test
 
 # test_commit_remove:
 # test_commit_modify:
