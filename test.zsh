@@ -65,27 +65,28 @@ echo "Test2, example 3 file" > test2/example3.txt
 ./WTF upgrade test1
 
 # --------------------------------------------
-# Test Case 4: Test Update with Conflicts: Should fail.
+# Test Case 4: Test Update with Conflicts: Should not fail.
 # --------------------------------------------
 # First execute test case 1 .................
 # Introduce conflicts by changing client files.
 echo "Test1, example 1 file, version 2" >> test1/example1.txt
 echo "Test1, example 2 file, version 2" >> test1/example2.txt
 
-# update should fail
+# update should not fail
 ./WTF update  test1
 ./WTF upgrade test1
 
 # --------------------------------------------
-# Test Case 5: Test Update with Conflicts: New files on client: Should fail.
+# Test Case 5: Test Update with Conflicts: New files on client side: Should not fail.
 # --------------------------------------------
 # First execute test case 1 .................
 # Introduce conflicts, by adding new files on client
 echo "Test1, example 4 file" > test1/example4.txt
 echo "Test1, example 5 file" > test1/example5.txt
-./WTF add test1/example4.txt
-./WTF add test1/example5.txt
+./WTF add test1 example4.txt
+./WTF add test1 example5.txt
 
-# update should fail
+# update should not fail
 ./WTF update  test1
 ./WTF upgrade test1
+
