@@ -46,7 +46,7 @@ int remove_client(char *project_name, char *file_path)
         {
             curr->file_removed = 1;
 
-            // Write to project's `.Manifest`
+            // Write to client .Manifest
             manifest_write(project_name, manifest);
             return 0; // no error
         }

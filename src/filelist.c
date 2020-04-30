@@ -113,3 +113,19 @@ FileList* filelist_append(FileList* filelist, FileList* item) {
   filelist->next = filelist_append(filelist->next, item);
   return filelist;
 }
+
+FileList *get_file_from(FileList *file_list, char *in_file_path)
+{
+    //returns a pointer to the file list if the file name matches
+    FileList *cur_file = file_list;
+    while (cur_file != NULL)
+    {
+        if (strcmp(cur_file->file_path, in_file_path) == 0)
+        {
+            return cur_file;
+        }
+        cur_file = cur_file->next;
+    }
+    return NULL;
+}
+

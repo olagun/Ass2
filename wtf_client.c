@@ -9,6 +9,7 @@
 #include "src/commands/currentversion.h"
 #include "src/commands/history.h"
 #include "src/commands/push.h"
+#include "src/commands/upgrade.h"
 #include "src/commands/remove.h"
 #include "src/commands/update.h"
 #include "src/commands/destroy.h"
@@ -78,6 +79,13 @@ int main(int argc, char** argv) {
     }
 
     update_client(argv[2]);
+  } else if (strcmp(argv[1], "upgrade") == 0) {
+    if (argc < 3) {
+      printf("Missing <project name>\n");
+      return 0;
+    }
+
+    upgrade_client(argv[2]);
   } else if (strcmp(argv[1], "history") == 0) {
     if (argc < 3) {
       printf("Missing <project name>\n");

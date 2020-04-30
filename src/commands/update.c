@@ -191,21 +191,6 @@ void update_client(char *project_name)
     }
 }
 
-FileList *get_file_from(FileList *file_list, char *in_file_path)
-{
-    //returns a pointer to the file list if the file name matches
-    FileList *cur_file = file_list;
-    while (cur_file != NULL)
-    {
-        if (strcmp(cur_file->file_path, in_file_path) == 0)
-        {
-            return cur_file;
-        }
-        cur_file = cur_file->next;
-    }
-    return NULL;
-}
-
 Response *update_server(Request *request)
 {
     // Called by server side. Accepts request from client.

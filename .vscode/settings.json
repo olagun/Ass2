@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "filelist.h": "c",
+        "directory_exists.h": "c",
+        "remove.h": "c"
+    }
+}

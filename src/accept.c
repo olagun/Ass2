@@ -67,6 +67,10 @@ Response* on_accept(Request* request) {
     return update_server(request);
   }
 
+  if (strcmp("upgrade", command_name) == 0) {
+    return update_server(request);
+  }
+
   // if (strcmp("<command_name>", command) == 0) {
   //   return <Command_name>_server(body);
   // }
