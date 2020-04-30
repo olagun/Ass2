@@ -7,6 +7,7 @@
 #include "src/commands/commit.h"
 #include "src/commands/create.h"
 #include "src/commands/currentversion.h"
+#include "src/commands/history.h"
 #include "src/commands/push.h"
 #include "src/commands/remove.h"
 #include "src/commands/update.h"
@@ -75,6 +76,13 @@ int main(int argc, char** argv) {
     }
 
     update_client(argv[2]);
+  } else if (strcmp(argv[1], "history") == 0) {
+    if (argc < 3) {
+      printf("Missing <project name>\n");
+      return 0;
+    }
+
+    history_client(argv[2]);
   } else {
     printf("Flag " BLU "%s" RESET " does not exist\n", argv[1]);
   }

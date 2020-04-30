@@ -35,6 +35,13 @@ int filelist_size(FileList* list) {
   return 1 + filelist_size(list->next);
 }
 
+FileList* filelist_readfile(char* project_name, char* file_path) {
+  FileList* file = filelist_new();
+  file->file_path = file_path;
+  file = filelist_readbytes(project_name, file);
+  return file;
+}
+
 // Reads files bytes into filelist
 FileList* filelist_readbytes(char* project_name, FileList* filelist) {
   if (filelist == NULL) return NULL;

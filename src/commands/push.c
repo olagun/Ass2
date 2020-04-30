@@ -29,7 +29,8 @@ void push_client(char* project_name) {
   // Instead of sending the entire .Commit file, I just send the hash of the
   // commit file. On the server, I check if the sent hash matches with a commit
   // stored on the server.
-  request->message = get_file_hash(project_name, ".Commit");
+  char* commit_hash = get_file_hash(project_name, ".Commit");
+  request->message = commit_hash;
 
   Response* response = client_send(request);
   if (response->status_code < 0) {
@@ -42,6 +43,7 @@ void push_client(char* project_name) {
 
   request = request_new();
   request->command_name = "push";
+  request->message = commit_hash;
   request->project_name = project_name;
   request->status_code = push_commit;
   request->project_version = manifest->project_version + 1;
@@ -77,7 +79,8 @@ Response* push_server(Request* request) {
     char* commit_hash = request->message;
 
     char* commit_file_path = calloc(strlen(commit_hash) + 50, sizeof(char));
-    sprintf(commit_file_path, "commits/.Commit_%s", commit_hash);
+    sprintf(commit_file_path, "commits/%s/.Commit_%s", project_name,
+            commit_hash);
 
     bool commit_exist = file_exists(commit_file_path);
     if (!commit_exist) {
@@ -88,28 +91,42 @@ Response* push_server(Request* request) {
       return response;
     }
 
-    // TODO(Sam): remove ALL commit
-    // remove that commit
-    remove(commit_file_path);
-
     Response* response = response_new();
     response->message = "Ok! Send me your changes now!";
     return response;
   }
 
   if (request->status_code == push_commit) {
+    char* commit_hash = request->message;
+
+    char* commit_file_path = calloc(strlen(commit_hash) + 50, sizeof(char));
+    sprintf(commit_file_path, "commits/%s/.Commit_%s", project_name,
+            commit_hash);
+
+    // Make history folder
+    char* history_path = calloc(strlen(project_name) + 50, sizeof(char));
+    sprintf(history_path, "history/%s", project_name);
+    mkdir(history_path, 0777);
+
     // Copy files into history
-    char* system_call = calloc(strlen(project_name) + 50, sizeof(char));
+    char* mv_project = calloc(strlen(project_name) + 50, sizeof(char));
     // TODO(Sam): Add hash to history
-    sprintf(system_call, "mv projects/%s history/%s_%d", project_name,
-            project_name, request->project_version);
-    system(system_call);
+    sprintf(mv_project, "mv projects/%s history/%s/%d", project_name,
+            project_name, request->project_version - 1);
+    system(mv_project);
 
     char* project_path = calloc(strlen(project_name) + 50, sizeof(char));
     sprintf(project_path, "projects/%s", project_name);
 
     mkdir(project_path, 0777);
     filelist_write(project_path, request->filelist);
+
+    // Move commit file
+    char* mv_commit = calloc(strlen(commit_file_path) + 50, sizeof(char));
+    sprintf(mv_commit, "mv commits/%s/.Commit_%s history/%s/%d/.Commit",
+            project_name, commit_hash, project_name,
+            request->project_version - 1);
+    system(mv_commit);
 
     Manifest* manifest = manifest_new();
     manifest->project_version = request->project_version;

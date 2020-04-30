@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "src/client.h"
@@ -113,6 +114,7 @@ void commit_client(char *project_name) {
 
   Request *commit_request = request_new();
   commit_request->command_name = "commit";
+  commit_request->project_name = project_name;
   commit_request->status_code = send_commit;
   commit_request->filelist = commit_file;
 
@@ -134,13 +136,14 @@ Response *commit_server(Request *request) {
 
   if (request->status_code == send_commit) {
     // Write commit to commits/<project_name>/.Commit_<commit_hash>
-    // char* commit_directory =
-    //     calloc(strlen(request->project_name) + 50, sizeof(char));
-    // sprintf(commit_directory, "commits/%s", request->project_name);
-    // // mkdir(commit_directory, 0777);
+    char *commit_directory =
+        calloc(strlen(request->project_name) + 50, sizeof(char));
+    sprintf(commit_directory, "commits/%s", request->project_name);
+
+    mkdir(commit_directory, 0777);
 
     FileList *commit_file = request->filelist;
-    filelist_write("commits", commit_file);
+    filelist_write(commit_directory, commit_file);
   }
 
   return NULL;

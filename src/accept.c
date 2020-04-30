@@ -6,6 +6,7 @@
 #include "src/commands/commit.h"
 #include "src/commands/create.h"
 #include "src/commands/currentversion.h"
+#include "src/commands/history.h"
 #include "src/commands/push.h"
 #include "src/commands/update.h"
 #include "src/request.h"
@@ -15,6 +16,10 @@
 // This is where most things happen
 Response* on_accept(Request* request) {
   char* command_name = request->command_name;
+
+  if (strcmp("history", command_name) == 0) {
+    return history_server(request);
+  }
 
   if (strcmp("create", command_name) == 0) {
     return create_server(request);

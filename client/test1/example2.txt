@@ -1,2 +1,0 @@
-Test1, example 2 file
-Test1, example 2 file, version 2

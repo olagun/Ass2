@@ -18,16 +18,23 @@ int token_size(Token* head) {
 }
 
 char* token_string(Token* head) {
-  int length = token_size(head);
-  char* string = calloc(length + 1, sizeof(char));
-
-  int index = 0;
-  while (head != NULL) {
-    string[index] = *head->token;
-    head = head->next;
-    index++;
+  int total_length = 0;
+  Token* curr = head;
+  while (curr != NULL) {
+    total_length += strlen(curr->token);
+    curr = curr->next;
   }
-  string[index] = '\0';
+
+  char* string = calloc(total_length + 1, sizeof(char));
+
+  int bytes_written = 0;
+  curr = head;
+  while (curr != NULL) {
+    int len = strlen(curr->token);
+    memcpy(string + bytes_written, curr->token, len);
+    bytes_written += len;
+    curr = curr->next;
+  }
 
   return string;
 }
