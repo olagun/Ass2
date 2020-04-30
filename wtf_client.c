@@ -11,6 +11,7 @@
 #include "src/commands/push.h"
 #include "src/commands/remove.h"
 #include "src/commands/update.h"
+#include "src/commands/destroy.h"
 #include "src/configure.h"
 #include "src/util/color.h"
 #include "src/util/get_server_manifest.h"
@@ -84,6 +85,13 @@ int main(int argc, char** argv) {
     }
 
     history_client(argv[2]);
+  } else if (strcmp(argv[1], "destroy") == 0) {
+    if (argc < 3) {
+      printf("Missing <project name>\n");
+      return 0;
+    }
+
+    destroy_client(argv[2]);
   } else {
     printf("Flag " BLU "%s" RESET " does not exist\n", argv[1]);
   }

@@ -8,28 +8,57 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
 #include "src/client.h"
+#include "src/util/directory_exists.h"
 
-// char* destroy(char* project) {
+void destroy_client(char* project_name) {
+  Request* request = request_new();
+  request->command_name = "destroy";
+  request->project_name = project_name;
 
-// char* directory = "direct";
-// //fails if name doesn't exist or client can't communicate
-// struct stat st = {0};
-// if (stat(directory, &st) == -1) {  //replace some directory with actual
-// pathname
-//     if(server_open(8000) == NULL){ //how to access actualt port #
-//         printf("%s", "destroy command failed");
-//     }
-// }
+  Response* response = client_send(request);
+  if (response->status_code < 0) {
+    printf("%s\n", response->message);
+    return;
+  }
 
-// lock repository, expire commits, delete all the files
-// receives a name of from WTFClient, access the thread of that project
-// a thread is made for every new connection, mutex only for project (locking
-// the mutex for the project) client send
+  printf("Destroyed project %s", project_name);
+}
 
-// make a server folder and client folder to test
+Response* destroy_server(Request* request) {
+  char* project_name = request->project_name;
 
-// }
+  char* project_path = calloc(strlen(project_name) + 50, sizeof(char));
+  sprintf(project_path, "projects/%s", project_name);
+
+  if (!directory_exists(project_path)) {
+    Response* response = response_new();
+    response->status_code = -1;
+    response->message = "Project doesn't exist.";
+    return response;
+  }
+
+  char* sys_commit = calloc(strlen(project_name) + 50, sizeof(char));
+  sprintf(sys_commit, "rm -rf commits/%s", project_name);
+
+  char* sys_history = calloc(strlen(project_name) + 50, sizeof(char));
+  sprintf(sys_history, "rm -rf history/%s", project_name);
+
+  char* sys_project = calloc(strlen(project_name) + 50, sizeof(char));
+  sprintf(sys_project, "rm -rf projects/%s", project_name);
+
+  // TODO(Sam): Is removing with system commands safe? Is there a better way to
+  // do this?
+  system(sys_commit);
+  system(sys_history);
+  system(sys_project);
+
+  Response* response = response_new();
+  response->status_code = 1;
+  response->message = "Success";
+  return response;
+}

@@ -97,6 +97,8 @@ test_update:
 test_history: test_push
 	cd client; ./WTF history test
 
+test_destroy: test_push
+	cd client; ./WTF destroy test
 # test_commit_remove:
 # test_commit_modify:
 

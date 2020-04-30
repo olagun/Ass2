@@ -6,6 +6,7 @@
 #include "src/commands/commit.h"
 #include "src/commands/create.h"
 #include "src/commands/currentversion.h"
+#include "src/commands/destroy.h"
 #include "src/commands/history.h"
 #include "src/commands/push.h"
 #include "src/commands/update.h"
@@ -36,6 +37,10 @@ Response* on_accept(Request* request) {
     response->project_version = manifest->project_version;
     response->filelist = manifest->filelist;
     return response;
+  }
+
+  if (strcmp("destroy", command_name) == 0) {
+    return destroy_server(request);
   }
 
   if (strcmp("history", command_name) == 0) {
