@@ -99,6 +99,9 @@ test_history: test_push
 
 test_destroy: test_push
 	cd client; ./WTF destroy test
+
+test_rollback: test_push
+	cd client; ./WTF rollback test 0
 # test_commit_remove:
 # test_commit_modify:
 

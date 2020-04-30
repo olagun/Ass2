@@ -9,6 +9,7 @@
 #include "src/commands/destroy.h"
 #include "src/commands/history.h"
 #include "src/commands/push.h"
+#include "src/commands/rollback.h"
 #include "src/commands/update.h"
 #include "src/manifest.h"
 #include "src/request.h"
@@ -69,6 +70,10 @@ Response* on_accept(Request* request) {
 
   if (strcmp("upgrade", command_name) == 0) {
     return update_server(request);
+  }
+
+  if (strcmp("rollback", command_name) == 0) {
+    return rollback_server(request);
   }
 
   // if (strcmp("<command_name>", command) == 0) {

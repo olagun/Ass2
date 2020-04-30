@@ -7,15 +7,15 @@
 #include "src/commands/commit.h"
 #include "src/commands/create.h"
 #include "src/commands/currentversion.h"
+#include "src/commands/destroy.h"
 #include "src/commands/history.h"
 #include "src/commands/push.h"
-#include "src/commands/upgrade.h"
 #include "src/commands/remove.h"
+#include "src/commands/rollback.h"
 #include "src/commands/update.h"
-#include "src/commands/destroy.h"
+#include "src/commands/upgrade.h"
 #include "src/configure.h"
 #include "src/util/color.h"
-#include "src/util/get_server_manifest.h"
 
 int main(int argc, char** argv) {
   if (argc < 2) {
@@ -100,6 +100,13 @@ int main(int argc, char** argv) {
     }
 
     destroy_client(argv[2]);
+  } else if (strcmp(argv[1], "rollback") == 0) {
+    if (argc < 3) {
+      printf("Missing <project name>\n");
+      return 0;
+    }
+
+    rollback_client(argv[2], argv[3]);
   } else {
     printf("Flag " BLU "%s" RESET " does not exist\n", argv[1]);
   }
