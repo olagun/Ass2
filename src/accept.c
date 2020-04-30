@@ -9,6 +9,7 @@
 #include "src/commands/history.h"
 #include "src/commands/push.h"
 #include "src/commands/update.h"
+#include "src/manifest.h"
 #include "src/request.h"
 #include "src/response.h"
 
@@ -16,6 +17,26 @@
 // This is where most things happen
 Response* on_accept(Request* request) {
   char* command_name = request->command_name;
+
+  if (strcmp("get_server_manifest", command_name) == 0) {
+    char* project_path =
+        calloc(strlen(request->project_name) + 50, sizeof(char));
+    sprintf(project_path, "projects/%s", request->project_name);
+
+    Manifest* manifest = manifest_read(project_path);
+
+    if (manifest == NULL) {
+      Response* response = response_new();
+      response->status_code = -1;
+      return response;
+    }
+
+    // Read `get_server_manifest` for why it's done this way
+    Response* response = response_new();
+    response->project_version = manifest->project_version;
+    response->filelist = manifest->filelist;
+    return response;
+  }
 
   if (strcmp("history", command_name) == 0) {
     return history_server(request);

@@ -13,6 +13,7 @@
 #include "src/commands/update.h"
 #include "src/configure.h"
 #include "src/util/color.h"
+#include "src/util/get_server_manifest.h"
 
 int main(int argc, char** argv) {
   if (argc < 2) {
