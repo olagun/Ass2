@@ -12,6 +12,7 @@
 #include "src/commands/push.h"
 #include "src/commands/remove.h"
 #include "src/commands/rollback.h"
+#include "src/commands/checkout.h"
 #include "src/commands/update.h"
 #include "src/commands/upgrade.h"
 #include "src/configure.h"
@@ -107,6 +108,13 @@ int main(int argc, char** argv) {
     }
 
     rollback_client(argv[2], argv[3]);
+  } else if (strcmp(argv[1], "checkout") == 0) {
+    if (argc < 3) {
+      printf("Missing <project name>\n");
+      return 0;
+    }
+
+    checkout_client(argv[2]);
   } else {
     printf("Flag " BLU "%s" RESET " does not exist\n", argv[1]);
   }

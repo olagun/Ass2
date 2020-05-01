@@ -19,7 +19,7 @@ Manifest* manifest_read(char* project_path) {
   sprintf(manifest_path, "%s/.Manifest", project_path);
   int manifest_fd = open(manifest_path, O_RDONLY, 0777);
 
-  // Turn manifest file into `Manifest`
+  // Turn .Manifest file into `Manifest`
   Manifest* manifest = manifest_new();
   manifest->project_version = atoi(read_line(manifest_fd));
 
@@ -38,6 +38,8 @@ Manifest* manifest_read(char* project_path) {
   }
   close(manifest_fd);
 
+  // After having read .Manifest, Now read the project files.
+  manifest->filelist =  filelist_readbytes(project_path, manifest->filelist);
   return manifest;
 }
 

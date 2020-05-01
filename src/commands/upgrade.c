@@ -34,7 +34,7 @@ void upgrade_client(char *project_name)
     char *conflict_path = calloc(strlen(project_name) + 50, sizeof(char));
     sprintf(conflict_path, "projects/%s/.Conflict", project_name);
     if(file_exists(conflict_path)){
-        printf("Error: Can not upgrade, there is a conflict.\n");
+        printf("Error: Can not upgrade, there is a conflict. First resolve all the conflicts, and then update.\n");
         return;
     }
 
@@ -55,6 +55,7 @@ void upgrade_client(char *project_name)
     //if the .Update file is empty, print "up to date" and tell the server that
     if(update_files == NULL){
         printf("Up to date (nothing in .Update file)\n");
+        remove(update_path);
         return;
     }
 
@@ -84,6 +85,7 @@ void upgrade_client(char *project_name)
     printf("Procees .Update 'M' and 'A' file:\n");
     update_item = update_files;
     while (update_item != NULL) {
+        
         if (update_item->file_status == 'M') {
             printf("%c %s %s\n", update_item->file_status, update_item->file_path, update_item->file_hash);
             // Have the client file overwritten by the one from the server and have its hash and version udated in the client .Manifest.
@@ -139,7 +141,7 @@ void upgrade_client(char *project_name)
 
         update_item = update_item->next;
     }
-
+    remove(update_path);
     manifest_write(project_name, local_manifest);
 }
 

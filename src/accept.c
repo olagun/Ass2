@@ -10,6 +10,7 @@
 #include "src/commands/history.h"
 #include "src/commands/push.h"
 #include "src/commands/rollback.h"
+#include "src/commands/checkout.h"
 #include "src/commands/update.h"
 #include "src/manifest.h"
 #include "src/request.h"
@@ -75,6 +76,10 @@ Response* on_accept(Request* request) {
   if (strcmp("rollback", command_name) == 0) {
     return rollback_server(request);
   }
+
+  // if (strcmp("checkout", command_name) == 0) {
+  //   return checkout_server(request);
+  // }
 
   // if (strcmp("<command_name>", command) == 0) {
   //   return <Command_name>_server(body);

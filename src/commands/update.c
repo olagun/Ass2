@@ -115,22 +115,18 @@ void update_client(char *project_name)
         }
 
         // If the file exists in the local DIRECTORY, then compare the live hash.
-        if (file_exists(server_files->file_path))
-        { // real file
+        if (file_exists(server_files->file_path)) { // real file
             live_hash = get_file_hash(project_name, server_files->file_path);
             if (strcmp(client_hash, live_hash) == 0)
             {
                 client_live_hash_matches = 1;
             }
-        }
-        else
-        {
-            client_live_hash_matches = 1;
+        } else{
+            client_live_hash_matches = 0;
         }
 
         // FAILURE CASE: if server and client.Mainfest hash are different, then it is a conflict.
-        if (!(client_server_hash_matches && client_live_hash_matches))
-        {
+        if (!(client_server_hash_matches && client_live_hash_matches)){
             // Write to Conflict file.
             num_conflicts++;
             dprintf(conflict_fd, "C %s %s\n", server_files->file_path, server_files->file_hash);
@@ -139,18 +135,15 @@ void update_client(char *project_name)
 
         // THREE PARTIAL SUCCESS CASES ---------------------------------------------------------------
         // CASE 1. Server has file modifications for the client.
-        if (!client_server_hash_matches && !client_server_version_matches)
-        {
-            if (client_live_hash_matches)
-            {
+        if (!client_server_hash_matches && !client_server_version_matches){
+            if (client_live_hash_matches){
                 dprintf(update_fd, "M %s %s\n", server_files->file_path, server_files->file_hash);
                 printf("M %s\n", server_files->file_path);
             }
         }
 
         // CASE 2. Server has files that were added to the project.
-        if (client_file == NULL)
-        {
+        if (client_file == NULL){
             // client's Manifest does not have a file that appears in the server.
             dprintf(update_fd, "A %s %s\n", server_files->file_path, server_files->file_hash);
             printf("M %s\n", server_files->file_path);

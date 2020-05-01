@@ -16,6 +16,8 @@ echo "Test1, example 3 file" > test1/example3.txt
 ./WTF commit test1
 ./WTF push   test1
 
+# Q: suppose i commit and push a file, and then physically delete that file locally, after that I issue the update command -- what happens?? -- according to project description I won't get it
+#testing update and upgrade - how to make serverside version different from the clientside?
 ./WTF update  test1
 ./WTF upgrade test1
 # Result: ok
@@ -89,4 +91,22 @@ echo "Test1, example 5 file" > test1/example5.txt
 # update should not fail
 ./WTF update  test1
 ./WTF upgrade test1
+
+# --------------------------------------------
+# Test Case 6: Test checkout
+# --------------------------------------------
+cd client
+./WTF create test1
+echo "Test1, example 1 file" > test1/example1.txt
+echo "Test1, example 2 file" > test1/example2.txt
+echo "Test1, example 3 file" > test1/example3.txt
+./WTF add test1 example1.txt
+./WTF add test1 example2.txt
+./WTF add test1 example3.txt
+
+./WTF commit test1
+./WTF push   test1
+
+rm -r test1
+./WTF checkout test1
 

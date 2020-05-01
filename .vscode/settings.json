@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "directory_exists.h": "c",
+        "checkout.h": "c"
+    }
+}
