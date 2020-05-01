@@ -17,9 +17,12 @@ void configure_write(char* ip, char* port) {
   close(configure_fd);
 }
 
-// TODO: Check if file is empty
 Configure* configure_read() {
   int configure_fd = open(".configure", O_RDONLY, 0777);
+
+  if (configure_fd < 0) {
+    return NULL;
+  }
 
   Configure* config = configure_new();
   config->ip = read_until(configure_fd, ':');

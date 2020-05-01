@@ -18,6 +18,10 @@ Manifest* manifest_read(char* project_path) {
   char* manifest_path = calloc(strlen(project_path) + 50, sizeof(char));
   sprintf(manifest_path, "%s/.Manifest", project_path);
   int manifest_fd = open(manifest_path, O_RDONLY, 0777);
+  if (manifest_fd < 0) {
+    printf("[Manifest Error] Could not read .Manifest at %s\n", project_path);
+    return NULL;
+  }
 
   // Turn .Manifest file into `Manifest`
   Manifest* manifest = manifest_new();
@@ -39,7 +43,7 @@ Manifest* manifest_read(char* project_path) {
   close(manifest_fd);
 
   // After having read .Manifest, Now read the project files.
-  manifest->filelist =  filelist_readbytes(project_path, manifest->filelist);
+  manifest->filelist = filelist_readbytes(project_path, manifest->filelist);
   return manifest;
 }
 

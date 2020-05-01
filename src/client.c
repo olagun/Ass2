@@ -16,6 +16,11 @@
 
 Response* client_send(Request* request) {
   int client_fd = client_open();
+  if (client_fd < 0) {
+    printf("[Client Error] Could not open a client connection.\n");
+    exit(1);
+    return NULL;
+  }
 
   request_write(client_fd, request);              // Write request
   Response* response = response_read(client_fd);  // Read response
@@ -26,6 +31,11 @@ Response* client_send(Request* request) {
 
 int client_open() {
   Configure* config = configure_read();
+
+  if (config == NULL || strlen(config->ip) == 0 || strlen(config->port) == 0) {
+    printf("[Configure Error] Could not read .configure.");
+    return -1;
+  }
 
   // `addrinfo` settings
   struct addrinfo hints = {0};
