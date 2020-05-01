@@ -17,7 +17,7 @@ all: build
 build: build_client build_server
 
 # Removes both client and server folder
-clean: clean_client clean_server clean_pdf
+clean: clean_client clean_server clean_pdf clean_test
 
 # DOES NOT Remove the client folder if it exists, compiles the client, and 
 # moves the client executable into client folder
@@ -62,6 +62,26 @@ run_server2:
 # Build then run the server
 run_server: build_server
 	cd server; ./WTFServer 8000
+
+# Build test
+build_test: build_server build_client clean_test
+	# Compile the server
+	gcc $(include_flags) $(source_files) wtf_test.c -o WTFTest $(open_ssl_flags)
+	# Make test folder
+	mkdir test
+	# Move the test executable
+	mv WTFTest test
+	# move server and client into test
+	mv server test
+	mv client test
+	cp -R answers test
+
+run_test:
+	cd test; ./WTFTest
+
+# Removes test folder
+clean_test:
+	rm -rf test
 
 # Removes client folder
 clean_client:
