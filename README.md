@@ -1,6 +1,12 @@
 # Ass2
 
-## Testing the client
+## Testing
+
+```bash
+make -s run_test 
+```
+
+## Using the client
 
 ```bash
 make build_client
@@ -10,7 +16,7 @@ cd client
 ./WTF create test_project
 ```
 
-## Testing the server
+## Using the server
 
 ```bash
 make build_server
