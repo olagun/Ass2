@@ -6,6 +6,9 @@
 
 #include "src/accept.h"
 #include "src/server.h"
+#include "src/testing.h"
+
+bool TESTING = false;
 
 int server_fd;
 

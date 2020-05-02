@@ -76,7 +76,7 @@ build_test: build_server build_client clean_test
 	mv client test
 	cp -R answers test
 
-run_test:
+run_test: build_test
 	cd test; ./WTFTest
 
 # Removes test folder

@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#include "src/accept.h"
 #include "src/request.h"
 #include "src/response.h"
 #include "src/token.h"

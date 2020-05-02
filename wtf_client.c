@@ -4,6 +4,7 @@
 
 #include "src/client.h"
 #include "src/commands/add.h"
+#include "src/commands/checkout.h"
 #include "src/commands/commit.h"
 #include "src/commands/create.h"
 #include "src/commands/currentversion.h"
@@ -12,11 +13,13 @@
 #include "src/commands/push.h"
 #include "src/commands/remove.h"
 #include "src/commands/rollback.h"
-#include "src/commands/checkout.h"
 #include "src/commands/update.h"
 #include "src/commands/upgrade.h"
 #include "src/configure.h"
+#include "src/testing.h"
 #include "src/util/color.h"
+
+bool TESTING = false;
 
 int main(int argc, char** argv) {
   if (argc < 2) {

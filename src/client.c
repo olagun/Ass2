@@ -8,13 +8,22 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "src/accept.h"
 #include "src/configure.h"
 #include "src/request.h"
 #include "src/response.h"
+#include "src/testing.h"
 #include "src/token.h"
 #include "src/util/color.h"
 
 Response* client_send(Request* request) {
+  if (TESTING) {
+    chdir("../server");
+    Response* response = on_accept(request);
+    chdir("../client");
+    return response;
+  }
+
   int client_fd = client_open();
   if (client_fd < 0) {
     printf("[Client Error] Could not open a client connection.\n");
