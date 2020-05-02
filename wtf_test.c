@@ -22,17 +22,35 @@ bool TESTING = true;
 // add if (!TESTING) before print statements across the program
 
 // HELPER FUNCTIONS
+int total_num_tests = 0;
+int total_tests_passed = 0;
+
+int tests_passed = 0;
+int num_tests = 0;
+
+void start_tests() {
+  tests_passed = 0;
+  num_tests = 0;
+}
+void end_tests() { total_tests_passed += tests_passed; }
+
+void print_result() { printf("%d/%d tests passed\n", tests_passed, num_tests); }
+
 void print_header(char* command) {
   printf("\ntesting " BWHT "%s" RESET "...\n", command);
 }
 
 void assert(char* test, bool val) {
+  num_tests++;
+
   if (val) {
-    printf(GRN "passes '%s'\n" RESET, test);
+    printf(GRN "(%d) passes '%s'\n" RESET, num_tests, test);
+    tests_passed++;
   } else {
-    printf(RED "fails '%s'\n" RESET, test);
+    printf(RED "(%d) fails '%s'\n" RESET, num_tests, test);
   }
 }
+
 bool file_eq(char* a, char* b) {
   if (get_file_size(a) != get_file_size(b)) {
     return false;
@@ -131,11 +149,14 @@ void test_configure() {
   Configure* config = run_configure();
 
   // Test
+  start_tests();
   assert("writes to .configure",
          file_eq("client/test/.configure",
                  "answers/configure/client/test/.configure"));
   assert("reads from .configure", strcmp(config->ip, "127.0.0.1") == 0 &&
                                       strcmp(config->port, "8000") == 0);
+  end_tests();
+  print_result();
 
   // Cleanup
   remove(".configure");
@@ -155,11 +176,14 @@ void test_create() {
   run_create();
 
   // Test
+  start_tests();
   assert("creates manifest on server",
          file_exists("server/projects/test/.Manifest"));
   assert("creates manifest on client", file_exists("client/test/.Manifest"));
   assert("correctly creates manifest on client",
          file_eq("client/test/.Manifest", "answers/create/test/.Manifest"));
+  end_tests();
+  print_result();
 
   // Cleanup
   clean_server();
@@ -179,8 +203,11 @@ void test_add() {
   run_add();
 
   // Test
+  start_tests();
   assert("correctly adds file to manifest",
          file_eq("client/test/.Manifest", "answers/add/client/test/.Manifest"));
+  end_tests();
+  print_result();
 
   // Cleanup
   clean_server();
@@ -201,9 +228,12 @@ void test_remove() {
   run_remove();
 
   // Test
+  start_tests();
   assert(
       "correctly removes file from client",
       file_eq("client/test/.Manifest", "answers/remove/client/test/.Manifest"));
+  end_tests();
+  print_result();
 
   // Cleanup
   clean_server();
@@ -224,10 +254,13 @@ void test_checkout() {
   run_checkout();
 
   // Test
+  start_tests();
   assert("correctly checks out manifest",
          file_eq("client/test/.Manifest", "server/projects/test/.Manifest"));
   assert("correctly checks out file",
          file_eq("client/test/file.txt", "server/projects/test/file.txt"));
+  end_tests();
+  print_result();
 
   // Cleanup
   clean_server();
