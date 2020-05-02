@@ -19,7 +19,13 @@
 
 bool TESTING = true;
 
+// add if (!TESTING) before print statements across the program
+
 // HELPER FUNCTIONS
+void print_header(char* command) {
+  printf("\ntesting " BWHT "%s" RESET "...\n", command);
+}
+
 void assert(char* test, bool val) {
   if (val) {
     printf(GRN "passes '%s'\n" RESET, test);
@@ -114,6 +120,8 @@ void run_checkout() {
 
 // Configure
 void test_configure() {
+  print_header("configure");
+
   // Setup
   setup_client();
   setup_server();
@@ -137,6 +145,8 @@ void test_configure() {
 
 // Create
 void test_create() {
+  print_header("create");
+
   // Setup
   setup_server();
   setup_client();
@@ -158,6 +168,8 @@ void test_create() {
 
 // Add
 void test_add() {
+  print_header("add");
+
   // Setup
   setup_server();
   setup_client();
@@ -177,6 +189,8 @@ void test_add() {
 
 // Remove
 void test_remove() {
+  print_header("remove");
+
   // Setup
   setup_server();
   setup_client();
@@ -198,6 +212,8 @@ void test_remove() {
 
 // Checkout
 void test_checkout() {
+  print_header("checkout");
+
   // Setup
   setup_server();
   setup_client();

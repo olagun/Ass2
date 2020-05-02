@@ -11,6 +11,7 @@
 #include "src/manifest.h"
 #include "src/request.h"
 #include "src/response.h"
+#include "src/testing.h"
 #include "src/util/color.h"
 
 // Client
@@ -80,8 +81,9 @@ Response* create_server(Request* request) {
   response->filelist = filelist_readbytes(project_path, manifest->filelist);
 
   // Log
-  printf("\n");
-  printf(BWHT "create " BLU "%s" RESET "\n", request->project_name);
-
+  if (!TESTING) {
+    printf("\n");
+    printf(BWHT "create " BLU "%s" RESET "\n", request->project_name);
+  }
   return response;
 }
