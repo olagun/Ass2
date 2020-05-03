@@ -24,8 +24,8 @@ void history_client(char* project_name) {
   request->project_name = project_name;
 
   Response* response = client_send(request);
-
-  if (response->status_code < -1) {
+  if (response->status_code < 0) {
+    printf("%s\n", response->message);
     return;
   }
 
@@ -39,14 +39,14 @@ Response* history_server(Request* request) {
   char* history_path = calloc(strlen(project_name) + 50, sizeof(char));
   sprintf(history_path, "history/%s", project_name);
 
-  DIR* history_dir = opendir(history_path);
-  if (history_dir == NULL) {
-    printf("Project '%s' doesn't exist in history", project_name);
-
+   if (!directory_exists(history_path)) {
     Response* response = response_new();
     response->status_code = -1;
+    response->message = "[History Error] Project doesn't exist in history";
     return response;
   }
+
+  DIR* history_dir = opendir(history_path);
 
   Token* head = NULL;
   struct dirent* entry;
@@ -67,6 +67,8 @@ Response* history_server(Request* request) {
         head = token_append(head, token_new(line));
         head = token_append(head, token_new("\n"));
       }
+      
+      head = token_append(head, token_new("\n"));
     }
   }
 

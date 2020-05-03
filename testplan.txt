@@ -1,0 +1,117 @@
+
+
+Checkout
+We tested the following cases:
+-done: Client requests a project that does not exist. 
+Result: Error message returned by server to client. Client exits with error and informs user.
+-done: Client requests a project that already exists on the client side. 
+Result: Client prints error and informs user that project already exists on the client side.
+-done: Checkout is called without running configure first.
+Result: Error message returned by server to client.
+-done: Client requests a valid project. 
+Result: Server sends compressed file containing project. Client fully decompresses file and creates the directory and all files within it according to manifest received in the single transferred file.
+
+Update 
+-Client tries to update a project that does not exist on the server. 
+Result: Error message returned by server to client. Client exits with error and informs user.
+-Update checks for each of these cases:
+-M (for modify) and the full path/file name- for a file that both the server and client have, but the server's .Manifest version and file version are different than
+ the client's, and the client's live hash of the file is the same as in its .Manifest.
+-A (for added) and the full path/file name- for a file that is in the server's .Manifest, but not the client's and the server's .Manifest is a different version than the client's
+-D (for deleted) and the full path/file name- for a file that is not in the server's .Manifest, but is in the client's and the server's .Manifest is a different version than the client'
+and checked that the .Update file contained the corresponding letter, version, filepath, and hash.
+The following cases return errors:
+-.Manifest is the same for server and client, and file version is different (which should be impossible).
+-.Manifest is different for server and client, file versions are different, and the hash is different.
+The errors are printed to STDOUT.
+
+Upgrade
+-Client tries to upgrade a project that does not exist on the server. 
+Result: Error message returned by server to client. Client exits with error and informs user.
+-Client calls upgrade for a project but .Update file does not exist for that project. 
+Result: Client exits with error and informs user to run Update first.
+-Client calls upgrade for a project with a blank .Update file. 
+Result: Client informs user that the project is up to date and deletes .Update file.
+-Client calls upgrade for a project with a valid .Update file. 
+Result: The client applies the changes listed in the .Update to the client's local copy of the project. It deletes the entry from the 
+client's .Manifest for all files tagged with a “D” and fetches from the server and writes or overwrites all files on the client side that
+are tagged with a “M” or “A”, respectively. When it is done processing all updates listed in it, the client deletes the .Update file.
+
+Commit
+We tested the following cases:
+-done: Client tries to commit a project that does not exist on the server. 
+Result: Error message returned by server to client. Client exits with error and informs user.
+Cases that pass without error:
+1. done: files that are in the server's .Manifest that are not in the client's (indicating they should be removed from the repository)
+2. done: files that are in the client's .Manifest that are not in the server's(indicating they should be added to the repository)
+3. files that are in both .Manifests, but also have an entry in the client's newly-written .Commit with a higher version number(indicating the client has a newer version than the server
+In these cases, the server creates a .commit file with the changes. We tested to make sure that additional .Commit were created if a .Commit for a project already 
+existed. We tested having a blank .Update file and got the server to still create the .Commit as expected. When the .Update was not blank, the 
+client printed error to the user.
+We tested the following error case:
+-Files in the server's .Manifest that have a different hashcode than the client's whose version number are not lower than the client's. Result: commit fails 
+with a message that the client must sync with the repository before committing changes.
+
+Push
+We tested the following cases:
+-Client tries to commit a project that does not exist on the server. 
+Result: Error message returned by server to client. Client exits with error and informs user.
+-.Commit does not exist on server/client. Result: Server/client returns error and the client reports error to the user.
+-Client sends differing .Commit file to the server. Result: Server returns error and client exits with error and informs user.
+-Valid input. Result: Server deletes all other .commit files for the project. Server compresses backup of current version. Server writes all files
+from compressed file client sent to project folder, overwriting any existing files. Server updates manifest and increments version.
+
+Create
+We tested the following cases:
+-Try creating a project that does not exist. 
+Result: Error message returned by server to client. Client exits with error and informs user.
+-Create a valid project. 
+Result: Server sends compressed manifest over with default version (=1). Client creates .manifest file with this decompressed data.
+-Create a project that already exists: 
+Result: Error message returned by server to client. Client exits with error and informs user.
+
+Destroy
+We tested the following cases:
+-done: Try destroying a project that does not exist. 
+Result: Error message returned by server to client. Client exits with error and informs user.
+-done: Destroying a valid project. 
+Result: Server deletes project directory.
+
+Add
+We tested the following cases:
+-Try adding file that does not exist in the project folder or the manifest does exists. 
+Result: Error caught and printed to terminal. Manifest stays unchanged.
+-Add valid file that exists in the project folder. 
+Result: Line added to manifest with version number, filename, and hash of file data.
+-Add file that exists in the project folder and already exists in the manifest. 
+Result: If the hash matches, file version in manifest stays the same. Otherwise, the version number is incremented and the newer hash replaces the old hash.
+
+Remove
+We tested the following cases:
+-Try removing file that does not exist in the project folder or the manifest does not exists. 
+Result: Error caught and printed to terminal. Manifest stays unchanged.
+-Remove valid file that exists in the project folder. 
+Result: Line removed from manifest.
+
+CurrentVersion
+-done: Request version for a project that does not exist. 
+Result: Error message returned by server. Client exits with error and informs user.
+-Request valid project version. 
+Result: Client outputs a list of all files under the project name, along with their version number
+
+History
+-done: Request history for a project that does not exist. 
+Result: Error message returned by server. Client exits with error and informs user.
+-done: Request valid history. 
+Result: The server sends over a compressed file containing the history of all operations performed on all successful pushes since the project's 
+creation, that is, it sends the .History file. The client receives the file, decompresses it, parses it, and outputs each version number, each push's 
+changes, and newline separating each push's log of changes.
+
+Rollback
+-done: Request rollback for a project that doesn't exist.
+Result: Error message returned by server. Client exits with error and informs user.
+-done: Request rollback for a project with an invalid version number. 
+Result: Error message returned by server. Client exits with error and informs user.
+-done: Request valid rollback. Result: Server deletes all newer versions than the specified version. Server decompresses specified version and returns success to client. Client outputs success to user.
+
+

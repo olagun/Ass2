@@ -6,7 +6,10 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <dirent.h>
+#include <errno.h>
 
+#include "src/testing.h"
 #include "src/client.h"
 #include "src/commands/commands.h"
 #include "src/filelist.h"
@@ -106,7 +109,7 @@ void commit_client(char *project_name) {
 
         // Append 'D <file/path> <server's hash>' to .Commit
         dprintf(commit_fd, "D %s %s\n", file_path, server_hash);
-
+        printf("D %s %s\n", file_path, server_hash);
       }
       // Modify Case
       else if (is_same_file && is_modified) {
@@ -115,6 +118,7 @@ void commit_client(char *project_name) {
 
         // Append 'M <file/path> <server's hash>' to .Commit
         dprintf(commit_fd, "M %s %s\n", file_path, server_hash);
+        printf("M %s %s\n", file_path, server_hash);
       }
       // Add Case
       else if (is_removed_server) {
@@ -123,6 +127,7 @@ void commit_client(char *project_name) {
 
         // Append 'A <file/path> <server's hash>' to .Commit
         dprintf(commit_fd, "A %s %s\n", file_path, live_hash);
+        printf("A %s %s\n", file_path, live_hash);
       }
 
       // Conflict case
@@ -167,8 +172,11 @@ void commit_client(char *project_name) {
       printf("[Commit Error] %s\n", commit_response->message);
     }
 
-    remove(commit_path);
+    // remove(commit_path);
+    if (!TESTING) {
     printf("[Commit] Successfully commited!\n");
+    }
+
   }
 }
 
@@ -207,6 +215,7 @@ Response *commit_server(Request *request) {
 
   // Respond to `send_commit`
   if (request->status_code == send_commit) {
+    
     // Write commit to commits/<project_name>/.Commit_<commit_hash>
     char *commit_directory =
         calloc(strlen(request->project_name) + 50, sizeof(char));
@@ -216,6 +225,10 @@ Response *commit_server(Request *request) {
 
     FileList *commit_file = request->filelist;
     filelist_write(commit_directory, commit_file);
+
+    Response *response = response_new();
+    response->message = "Successfully created .Commit";
+    return response;
   }
 
   // Ooops. This should never happen

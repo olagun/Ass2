@@ -14,7 +14,7 @@ void rollback_client(char* project_name, char* project_version) {
   request->project_version = atoi(project_version);
 
   Response* response = client_send(request);
-  if (response < 0) {
+  if (response->status_code < 0) {
     printf("%s\n", response->message);
     return;
   }
@@ -30,6 +30,13 @@ Response* rollback_server(Request* request) {
   char* project_path = calloc(strlen(project_name) + 50, sizeof(char));
   sprintf(project_path, "projects/%s", project_name);
 
+  if (!directory_exists(project_path)) {
+    Response* response = response_new();
+    response->message = "[Rollback Error] Project doesn't exist";
+    response->status_code = -1;
+    return response;
+  }
+
   // Rollback version
   int rollback_version = request->project_version;
 
@@ -37,7 +44,7 @@ Response* rollback_server(Request* request) {
   Manifest* manifest = manifest_read(project_path);
   if (manifest->project_version == rollback_version) {
     Response* response = response_new();
-    response->message = "Project is already at this version";
+    response->message = "[Rollback Error] Project is already at this version";
     response->status_code = -1;
     return response;
   }
@@ -54,7 +61,7 @@ Response* rollback_server(Request* request) {
   // Fail if the rollback project version doesn't exist
   if (!directory_exists(version_path)) {
     Response* response = response_new();
-    response->message = "Could not find project version on the server.";
+    response->message = "[Rollback Error] Could not find project version on the server.";
     response->status_code = -1;
     return response;
   }
@@ -66,7 +73,7 @@ Response* rollback_server(Request* request) {
   if (dir == NULL) {
     perror("[Rollback Error]");
     Response* response = response_new();
-    response->message = "Could not find project history.";
+    response->message = "[Rollback Error] Could not find project history.";
     response->status_code = -1;
     return response;
   }

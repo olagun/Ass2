@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "testing.h": "c",
+        "token.h": "c"
+    }
+}

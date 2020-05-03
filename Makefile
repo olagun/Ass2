@@ -41,6 +41,15 @@ build_client: clean_client
 	# Run 'configure' beforehand
 	cd client; ./WTF configure 127.0.0.1 8000
 
+build_client_no_configure: clean_client
+	# Compile the client
+	gcc $(include_flags) $(source_files) wtf_client.c -o WTF $(open_ssl_flags)
+	# Make client folder
+	mkdir client
+	# Move the client executable
+	mv WTF client
+
+
 # Removes the server folder if it exists, compiles the server, and 
 # moves the server executable into server folder
 build_server: clean_server
@@ -64,7 +73,7 @@ run_server: build_server
 	cd server; ./WTFServer 8000
 
 # Build test
-build_test: build_server build_client clean_test
+build_test: clean_test
 	# Compile the server
 	gcc $(include_flags) $(source_files) wtf_test.c -o WTFTest $(open_ssl_flags)
 	# Make test folder
@@ -72,8 +81,6 @@ build_test: build_server build_client clean_test
 	# Move the test executable
 	mv WTFTest test
 	# move server and client into test
-	mv server test
-	mv client test
 	cp -R answers test
 
 run_test: build_test

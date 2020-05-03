@@ -22,10 +22,9 @@ void checkout_client(char* project_name) {
     }
   
     //2. Fail if the .configure does not exist 
-    char *configure_path = calloc(strlen(project_name) + 50, sizeof(char));
-    sprintf(configure_path, ".configure");
+
     //FileList *configure_files = NULL; 
-    if(!file_exists(configure_path)) {
+    if(!file_exists(".configure")) {
         printf("Error: first run configure.\n");
         return;
     } 
@@ -49,26 +48,3 @@ void checkout_client(char* project_name) {
      manifest_write(project_name, server_manifest);
 }
 
-// void checkout_server(Request *request){
-//     // Called by server side. Accepts request from client.
-//     if (request->status_code == get_manifest)
-//     {
-//         char *full_path = calloc(strlen(request->project_name) + 50, sizeof(char));
-//         sprintf(full_path, "projects/%s", request->project_name);
-
-//         if (!directory_exists(full_path))
-//         {
-//             Response *response = response_new();
-//             response->status_code = -1;
-//             response->message = "Project doesn't exist on the server";
-//             return response;
-//         }
-//     }
-
-//     if (request->status_code == send_update)
-//     {
-//         FileList *update_filelist = request->filelist;
-//         filelist_write("updates", update_filelist);
-//     }
-//     return NULL;
-// }

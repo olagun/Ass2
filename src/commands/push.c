@@ -1,4 +1,3 @@
-
 #include "src/commands/push.h"
 
 #include <fcntl.h>
@@ -55,6 +54,11 @@ void push_client(char* project_name) {
     return;
   }
 
+  // Update client manfiest
+  manifest->project_version++;
+  manifest_write(project_name, manifest);
+
+  // Delete .Commit
   char* commit_path = calloc(strlen(project_name) + 50, sizeof(char));
   sprintf(commit_path, "%s/.Commit", project_name);
   remove(commit_path);
@@ -135,6 +139,7 @@ Response* push_server(Request* request) {
 
     Response* response = response_new();
     response->message = "Awesome, committed!";
+    response->project_version = manifest->project_version;
     return response;
 
     // All files except for `.Manifest`

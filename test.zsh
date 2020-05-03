@@ -13,6 +13,7 @@ echo "Test1, example 3 file" > test1/example3.txt
 ./WTF add test1 example2.txt
 ./WTF add test1 example3.txt
 
+#TODO: after removing a file, test commit and checkout
 ./WTF commit test1
 ./WTF push   test1
 

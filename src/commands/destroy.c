@@ -38,7 +38,7 @@ Response* destroy_server(Request* request) {
   if (!directory_exists(project_path)) {
     Response* response = response_new();
     response->status_code = -1;
-    response->message = "Project doesn't exist.";
+    response->message = "[Destroy Error] Project doesn't exist.";
     return response;
   }
 

@@ -98,7 +98,9 @@ source ~/.bash_profile
 <file_version>:
 <file_hash>:
 <file_size>:
+<file_removed>:
 <file_bytes>
+
 ```
 
 ### Request Protocol
@@ -116,5 +118,7 @@ source ~/.bash_profile
 <file_version>:
 <file_hash>:
 <file_size>:
-<file_bytes>
+<file_removed>:
+<file_bytes>:
+
 ```
