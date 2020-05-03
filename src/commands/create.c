@@ -9,6 +9,7 @@
 
 #include "src/client.h"
 #include "src/manifest.h"
+#include "src/mutexlist.h"
 #include "src/request.h"
 #include "src/response.h"
 #include "src/testing.h"
@@ -60,13 +61,24 @@ Response* create_server(Request* request) {
     return response;
   }
 
+  // Add mutex for project folder directly after creating it
+  // [Add] Project
+  add_project_mutex(request->project_name);
+
+  // [Lock] Project
+  lock_project(request->project_name);
+
   // Create manifest file and write version number
   if (creat(manifest_path, 0777) < 0) {
     Response* response = response_new();
     response->status_code = -1;
     response->message = "Couldn't create a manifest folder";
+
+    // [Unlock] Project
+    unlock_project(request->project_name);
     return response;
   }
+
   int manifest_fd = creat(manifest_path, 0777);
   dprintf(manifest_fd, "0\n");  // Write version number
   close(manifest_fd);
@@ -83,7 +95,13 @@ Response* create_server(Request* request) {
   // Log
   if (!TESTING) {
     printf("\n");
-    printf(BWHT "create " BLU "%s" RESET "\n", request->project_name);
+    printf("Created new project " BLU "%s" RESET "\n", request->project_name);
+    printf("\n");
   }
+
+  // sleep(5);
+
+  // [Unlock] Project
+  unlock_project(request->project_name);
   return response;
 }

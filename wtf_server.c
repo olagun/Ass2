@@ -4,6 +4,9 @@
 #include <unistd.h>
 
 #include "src/accept.h"
+#include "src/mutexlist.h"
+#include "src/request.h"
+#include "src/response.h"
 #include "src/server.h"
 #include "src/testing.h"
 #include "src/util/color.h"
@@ -23,6 +26,36 @@ void on_exit() {
 void on_interrupt() {
   printf(BYEL "[Signal]" RESET " Caught interrupt signal\n");
   exit(1);
+}
+
+// Thread that runs on every new connection
+// See: `server_wait`
+void* on_connection(void* client_fd_ptr) {
+  int client_fd = *((int*)client_fd_ptr);
+
+  Request* request = request_read(client_fd);  // Read request
+
+  char* command_name = request->command_name;
+  char* project_name = request->project_name;
+
+  bool includes_project = strlen(project_name) > 0;
+  bool is_create = strcmp(command_name, "create") == 0;
+  bool is_destroy = strcmp(command_name, "destroy") == 0;
+
+
+  // Lock all programs that use 
+  bool should_lock = includes_project && !is_create && !is_destroy;
+
+  // Lock Mutex
+  if (should_lock) lock_project(project_name);
+
+  response_write(client_fd, on_accept(request));  // Write response
+
+  // Unlock Mutex
+  if (should_lock) unlock_project(project_name);
+
+  close(client_fd);
+  return NULL;
 }
 
 int main(int argc, char** argv) {
@@ -46,7 +79,7 @@ int main(int argc, char** argv) {
 
   // Wait for and accept new connections
   while (true) {
-    server_wait(server_fd, on_accept);
+    server_wait(server_fd, on_connection);
   }
 
   return 0;

@@ -12,26 +12,20 @@
 #include <unistd.h>
 
 #include "src/read.h"
-#include "src/request.h"
-#include "src/response.h"
 #include "src/token.h"
 #include "src/util/color.h"
 
 // TODO: Open new thread after accepting connection
-void server_wait(int server_fd, Response* (*on_accept)(Request*)) {
+void server_wait(int server_fd, void* (*on_connection)(void*)) {
   int client_fd = accept(server_fd, NULL, NULL);
 
   // "Server announces acceptance of connection from client"
   printf(BGRN "[Server Success]" RESET " Accepted new client connection\n");
 
-  Request* request = request_read(client_fd);     // Read request
-  response_write(client_fd, on_accept(request));  // Write response
-
-  close(client_fd);
-
-  // create a new thread
-  // pthread_t thread;
-  // pthread_create(&thread, NULL, on_accept, request);
+  // Create a new thread for connection
+  printf(BWHT "[Server]" RESET " Creating a new thread...\n");
+  pthread_t thread;
+  pthread_create(&thread, NULL, on_connection, &client_fd);
 }
 
 int server_open(char* port) {
@@ -44,7 +38,10 @@ int server_open(char* port) {
   // Convert URL/Port to IP
   struct addrinfo* result;
   if (getaddrinfo(NULL, port, &hints, &result) != 0) {
-    printf("%s\n", strerror(errno));
+    printf(BRED
+           "[Server Errror]"
+           " %s\n",
+           strerror(errno));
     return -1;
   }
 
@@ -56,17 +53,25 @@ int server_open(char* port) {
   setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
 
   if (bind(socket_fd, result->ai_addr, result->ai_addrlen) != 0) {
-    printf("%s\n", strerror(errno));
+    printf(BRED
+           "[Server Errror]"
+           " %s\n",
+           strerror(errno));
     return -1;
   }
 
   // Listen for incoming connections
   if (listen(socket_fd, 128 /* Max number of connections */) != 0) {
-    printf("%s\n", strerror(errno));
+    printf(BRED
+           "[Server Errror]"
+           " %s\n",
+           strerror(errno));
     return -1;
   }
 
+  printf("\n");
   printf("Server running on " GRN ":%s" RESET "\n", port);
+  printf("\n");
 
   return socket_fd;
 }
