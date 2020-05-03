@@ -4,6 +4,7 @@
 #include "src/manifest.h"
 #include "src/request.h"
 #include "src/response.h"
+#include "src/util/color.h"
 
 // Client function to request manifest from server.
 // Check `accept.c` for more info on what the server does.
@@ -14,6 +15,7 @@ Manifest* get_server_manifest(char* project_name) {
 
   Response* response = client_send(request);
   if (response->status_code < 0) {
+    printf(BRED "[Get Server Manifest Error]" RESET " %s\n", response->message);
     return NULL;
   }
 

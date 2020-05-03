@@ -31,7 +31,6 @@ void request_write(int fd, Request* request) {
     dprintf(fd, "%d:", item->file_version);        // <file_version>:
     dprintf(fd, "%s:", item->file_hash);           // <file_hash>:
     dprintf(fd, "%d:", item->file_size);           // <file_size>:
-    dprintf(fd, "%d:", item->file_removed);        // <file_removed>:
     write(fd, item->file_bytes, item->file_size);  // <file_bytes>
     item = item->next;
   }
@@ -62,7 +61,6 @@ Request* request_read(int fd) {
     item->file_version = atoi(read_until(fd, ':'));       // <file_version>:
     item->file_hash = read_until(fd, ':');                // <file_hash>:
     item->file_size = atoi(read_until(fd, ':'));          // <file_size>:
-    item->file_removed = atoi(read_until(fd, ':'));       // <file_removed>:
     item->file_bytes = read_nbytes(fd, item->file_size);  // <file_bytes>
 
     // Append item to list
@@ -91,14 +89,13 @@ void request_log(Request* request) {
 
     FileList* item = request->filelist;
     while (item != NULL) {
-      printf("├── " BLU "%s" RESET "\n", item->file_path);
-      printf("├── file size:\t" BLU "%d" RESET "\n", item->file_size);
-      printf("├── file removed:\t" BLU "%d" RESET "\n", item->file_removed);
+      printf("├ " BLU "%s" RESET "\n", item->file_path);
+      printf("├ ├ file size:\t" BLU "%d" RESET "\n", item->file_size);
       if (item->file_size < 100) {
-        printf("├── file bytes:\t" YEL "$" BLU "%.*s" YEL "$" RESET "\n",
+        printf("├ ├ file bytes:\t" YEL "$" BLU "%.*s" YEL "$" RESET "\n",
                item->file_size, item->file_bytes);
       } else {
-        printf("├── file bytes:\tfile too large too print\n");
+        printf("├ ├ file bytes:\tfile too large too print\n");
       }
 
       item = item->next;

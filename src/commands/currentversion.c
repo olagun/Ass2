@@ -20,7 +20,7 @@ void currentversion_client(char* project_name) {
   FileList* item = response->filelist;
   while (item != NULL) {
     printf("file_path: %s/%s\n", project_name, item->file_path);
-    printf("file_version: %s/%d\n", project_name, item->file_version);
+    printf("file_version: %d\n", item->file_version);
 
     item = item->next;
   }

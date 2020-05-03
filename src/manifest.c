@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include "src/read.h"
+#include "src/util/color.h"
 
 Manifest* manifest_new() { return calloc(1, sizeof(Manifest)); }
 
@@ -19,7 +20,8 @@ Manifest* manifest_read(char* project_path) {
   sprintf(manifest_path, "%s/.Manifest", project_path);
   int manifest_fd = open(manifest_path, O_RDONLY, 0777);
   if (manifest_fd < 0) {
-    printf("[Manifest Error] Could not read .Manifest at %s\n", project_path);
+    printf(BRED "[Manifest Error]" RESET " Could not read .Manifest at %s\n",
+           project_path);
     return NULL;
   }
 
@@ -33,9 +35,9 @@ Manifest* manifest_read(char* project_path) {
     item->file_path = calloc(strlen(line), sizeof(char));
     item->file_hash = calloc(strlen(line), sizeof(char));
 
-    // Scan in <file_path> <file_version> <file_hash> <file_removed> from line
-    sscanf(line, "%s %d %s %d", item->file_path, &item->file_version,
-           item->file_hash, &item->file_removed);
+    // Scan in <file_path> <file_version> <file_hash> from line
+    sscanf(line, "%s %d %s", item->file_path, &item->file_version,
+           item->file_hash);
 
     // Append item to list
     manifest->filelist = filelist_append(manifest->filelist, item);
@@ -52,7 +54,8 @@ void manifest_write(char* project_path, Manifest* manifest) {
   // Error if project path doesn't exist
   int missing_folder = opendir(project_path) == NULL;
   if (missing_folder) {
-    printf("Can't write manifest to non-existent project\n");
+    printf(BRED "[Manifest Error]" RESET
+                " Can't write manifest to non-existent project\n");
     return;
   }
 
@@ -68,8 +71,8 @@ void manifest_write(char* project_path, Manifest* manifest) {
   FileList* item = manifest->filelist;
   while (item != NULL) {
     // Write <file_path> <file_version> <file_hash> <file_removed> to line
-    dprintf(manifest_fd, "%s %d %s %d\n", item->file_path, item->file_version,
-            item->file_hash, item->file_removed);
+    dprintf(manifest_fd, "%s %d %s\n", item->file_path, item->file_version,
+            item->file_hash);
 
     item = item->next;
   }

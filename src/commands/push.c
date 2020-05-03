@@ -46,7 +46,15 @@ void push_client(char* project_name) {
   request->project_name = project_name;
   request->status_code = push_commit;
   request->project_version = manifest->project_version + 1;
-  request->filelist = filelist_readbytes(project_name, manifest->filelist);
+
+  // Read in contents
+  FileList* files = filelist_readbytes(project_name, manifest->filelist);
+  // Increment version
+  files = filelist_increment_version(files);
+  // Update hash
+  files = filelist_update_hash(project_name, files);
+
+  request->filelist = files;
 
   response = client_send(request);
   if (response->status_code < 0) {

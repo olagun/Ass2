@@ -1,52 +1,51 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
 #include "src/accept.h"
 #include "src/server.h"
 #include "src/testing.h"
+#include "src/util/color.h"
 
 bool TESTING = false;
 
 int server_fd;
 
-// Closes server
-void on_exit() { close(server_fd); }
+void on_exit() {
+  printf(BYEL "[Exit]" RESET " Closing server socket\n");
+  close(server_fd);
+  // printf(BYEL "[Exit]" RESET " Shutting down all threads\n");
+  printf("Bye\n");
+}
 
 // Catches `Ctrl + C`
 void on_interrupt() {
-  // Clear memory here?
-  printf("Bye\n");
+  printf(BYEL "[Signal]" RESET " Caught interrupt signal\n");
   exit(1);
 }
 
 int main(int argc, char** argv) {
-  // Setup signal handlers
   atexit(on_exit);
   signal(SIGINT, on_interrupt);
 
-  // Flags
-  if (argc < 2) {
-    printf("Missing arguments.\n");
+  if (argc != 2) {
+    printf(BWHT "[Flag Error]" RESET " Invalid number of arguments\n");
     return 0;
   }
 
-  // Open server
   int server_fd = server_open(argv[1]);
   if (server_fd < 0) {
-    printf("Server couldn't be started.\n");
+    printf(BRED "[Servor Error]" RESET " Server couldn't start\n");
     return 0;
   }
 
-  // Create folders to organize server
-  mkdir("projects", 0777);  // Stores projects
-  mkdir("history", 0777);   // Stores old projects
-  mkdir("commits", 0777);   // Stores `.Commit` files
+  mkdir("projects", 0777);
+  mkdir("history", 0777);
+  mkdir("commits", 0777);
 
-  // Wait for and accept new connections forever
-  while (1) {
+  // Wait for and accept new connections
+  while (true) {
     server_wait(server_fd, on_accept);
   }
 

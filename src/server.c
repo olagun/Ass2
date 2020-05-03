@@ -21,8 +21,8 @@
 void server_wait(int server_fd, Response* (*on_accept)(Request*)) {
   int client_fd = accept(server_fd, NULL, NULL);
 
-  printf("\n");
-  printf(BWHT "Accepted new connection" RESET "\n");
+  // "Server announces acceptance of connection from client"
+  printf(BGRN "[Server Success]" RESET " Accepted new client connection\n");
 
   Request* request = request_read(client_fd);     // Read request
   response_write(client_fd, on_accept(request));  // Write response
