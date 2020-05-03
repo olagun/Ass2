@@ -1,6 +1,7 @@
 source_files := $(wildcard src/*.c) $(wildcard src/commands/*.c) $(wildcard src/util/*.c)
 include_flags := -I includes/ -I /usr/local/opt/openssl/include/ 
 open_ssl_flags := -L /usr/local/opt/openssl/lib -lssl -lcrypto
+other_flags := -pthread
 
 all: build build_pdf
 build: build_client build_server
@@ -8,24 +9,24 @@ clean: clean_client clean_client2 clean_server clean_pdf clean_test
 
 # Build ---
 build_client: clean_client
-	gcc $(include_flags) $(source_files) wtf_client.c -o WTF $(open_ssl_flags)
+	gcc $(include_flags) $(other_flags) $(source_files) wtf_client.c -o WTF $(open_ssl_flags)
 	mkdir client
 	mv WTF client
 	cd client; ./WTF configure 127.0.0.1 8000
 
 build_client2: clean_client2
-	gcc $(include_flags) $(source_files) wtf_client.c -o WTF $(open_ssl_flags)
+	gcc $(include_flags) $(other_flags) $(source_files) wtf_client.c -o WTF $(open_ssl_flags)
 	mkdir client2
 	mv WTF client2
 	cd client2; ./WTF configure 127.0.0.1 8000
 
 build_server: clean_server
-	gcc $(include_flags) $(source_files) wtf_server.c -o WTFServer $(open_ssl_flags)
+	gcc $(include_flags) $(other_flags) $(source_files) wtf_server.c -o WTFServer $(open_ssl_flags)
 	mkdir server
 	mv WTFServer server
 
 build_test: clean_test
-	gcc $(include_flags) $(source_files) wtf_test.c -o WTFTest $(open_ssl_flags)
+	gcc $(include_flags) $(other_flags) $(source_files) wtf_test.c -o WTFTest $(open_ssl_flags)
 	mkdir test
 	mv WTFTest test
 	cp -R answers test

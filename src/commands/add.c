@@ -25,10 +25,14 @@ void add_client(char* project_name, char* file_path) {
   file->file_path = file_path;
   file->file_hash = get_file_hash(project_name, file_path);
 
-  // Append the file to manifest
+  // Append the file to client manifest, if it does not already exist in the client manifest.
   Manifest* manifest = manifest_read(project_name);
-  manifest->filelist = filelist_append(manifest->filelist, file);
-
+  FileList* file_in_manifest = get_file_from(manifest->filelist, file_path);
+  if (file_in_manifest == NULL) {
+    manifest->filelist = filelist_append(manifest->filelist, file);
+  } else {
+    printf("[add] file %s has already been added.\n", full_path);
+  }
   // Write to manifest
   manifest_write(project_name, manifest);
 
