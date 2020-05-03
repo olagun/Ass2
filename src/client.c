@@ -1,5 +1,6 @@
 #include "src/client.h"
 
+#include <errno.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,7 +63,6 @@ int client_open() {
   if (config == NULL || strlen(config->ip) == 0 || strlen(config->port) == 0) {
     printf(BRED "[Configure Error]" RESET
                 " Could not read from `.configure`\n" RESET);
-    printf("[Configure Error] Could not read .configure.");
     return -1;
   }
 
@@ -73,13 +73,25 @@ int client_open() {
 
   // Convert URL/Port into IP
   struct addrinfo* result;
-  if (getaddrinfo(config->ip, config->port, &hints, &result) != 0) return -1;
+  if (getaddrinfo(config->ip, config->port, &hints, &result) != 0) {
+    printf(BRED
+           "[Client Errror]"
+           " %s\n",
+           strerror(errno));
+    return -1;
+  }
 
   // Create socket
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 
   // Add connection to socket
-  if (connect(socket_fd, result->ai_addr, result->ai_addrlen) != 0) return -1;
+  if (connect(socket_fd, result->ai_addr, result->ai_addrlen) != 0) {
+    printf(BRED
+           "[Client Errror]"
+           " %s\n",
+           strerror(errno));
+    return -1;
+  }
 
   return socket_fd;
 }
