@@ -148,6 +148,3 @@ test_currentversion_nonexistent: build_client
 
 test_currentversion_valid: test_push
 	cd client; ./WTF currentversion test
-
-# destroy
-test_destroy
