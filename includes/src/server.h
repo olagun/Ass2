@@ -7,7 +7,7 @@
 // Opens server on port
 int server_open(char* port);
 
-// Waits for new connections. Calls `on_accept` when recieves one
-void server_wait(int server_fd, Response* (*on_accept)(Request*));
+// Waits for new connections. Calls `on_connection` when recieves one
+void server_wait(int server_fd, void* (*on_connection)(void*));
 
 #endif

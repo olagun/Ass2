@@ -1,9 +1,3 @@
-// The destroy command will fail if the project name doesn’t exist on the server
-// or the client can not communicate with it. On receiving a destroy command the
-// server should lock the repository, expire any pending commits, delete all
-// files
-// and subdirectories under the project and send back a success message.
-
 #include <fcntl.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -13,6 +7,7 @@
 #include <sys/types.h>
 
 #include "src/client.h"
+#include "src/mutexlist.h"
 #include "src/util/directory_exists.h"
 
 void destroy_client(char* project_name) {
@@ -26,7 +21,7 @@ void destroy_client(char* project_name) {
     return;
   }
 
-  printf("Destroyed project %s", project_name);
+  printf(BWHT "[Destroy]" RESET " Successfully destroyed '%s'\n", project_name);
 }
 
 Response* destroy_server(Request* request) {
@@ -42,23 +37,30 @@ Response* destroy_server(Request* request) {
     return response;
   }
 
-  char* sys_commit = calloc(strlen(project_name) + 50, sizeof(char));
-  sprintf(sys_commit, "rm -rf commits/%s", project_name);
+  // [Lock] Project
+  lock_project(request->project_name);
 
-  char* sys_history = calloc(strlen(project_name) + 50, sizeof(char));
-  sprintf(sys_history, "rm -rf history/%s", project_name);
+  char s[1000] = {0};
 
-  char* sys_project = calloc(strlen(project_name) + 50, sizeof(char));
-  sprintf(sys_project, "rm -rf projects/%s", project_name);
+  sprintf(s, "rm -rf commits/%s", project_name);
+  system(s);
 
-  // TODO(Sam): Is removing with system commands safe? Is there a better way to
-  // do this?
-  system(sys_commit);
-  system(sys_history);
-  system(sys_project);
+  sprintf(s, "rm -rf history/%s", project_name);
+  system(s);
+
+  sprintf(s, "rm -rf projects/%s", project_name);
+  system(s);
+
+  // [Test Destroy Mutex]
+  // sleep(5);
+
+  // [Unlock] Project
+  unlock_project(request->project_name);
+
+  // [Remove] Project
+  remove_project_mutex(request->project_name);
 
   Response* response = response_new();
-  response->status_code = 1;
-  response->message = "Success";
+  response->message = "[Destroy] Successfully destroyed project";
   return response;
 }
