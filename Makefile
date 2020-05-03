@@ -149,3 +149,127 @@ test_currentversion_nonexistent: build_client
 
 test_currentversion_valid: test_push
 	cd client; ./WTF currentversion test
+
+
+# --------------------------------------------
+# Test Case 4: Create one Project, Add files, Commit, Push.
+#              Then modify example1.txt, and remove example3.txt,
+#              Then Commit, Push.
+#              REMOVE THE PROJECT LOCALLY, then
+#              Try CHECKOUT - which should suceed.
+# --------------------------------------------
+test_case4: 
+	rm -rf client/test1
+	cd client; ./WTF create test1
+	echo "Test1, example 1 file" > client/test1/example1.txt
+	echo "Test1, example 2 file" > client/test1/example2.txt
+	echo "Test1, example 3 file" > client/test1/example3.txt
+	cd client; ./WTF add test1 example1.txt
+	cd client; ./WTF add test1 example2.txt
+	cd client; ./WTF add test1 example3.txt
+	cd client; ./WTF commit test1
+	cd client; ./WTF push   test1
+	# Modify exmple1.txt
+	echo "Test1, example 1 file, modified" >> client/test1/example1.txt
+	# Remove exmple3.txt
+	cd client; ./WTF remove test1 example3.txt
+	cd client; ./WTF commit test1
+	cd client; ./WTF push   test1
+	# test scceeded.
+	# Remove the project locally.
+	cd client; rm -r test1
+	cd client; ./WTF checkout test1
+	# test succeeded: Successfully checked out example2.txt, & the modified file exmaple1.txt. Correct files in .Manifest.
+
+
+# --------------------------------------------
+# Test Case 4a: Create one Project, Add files, Commit, Push.
+#              Then modify example1.txt, and remove example3.txt,
+#              Then Commit, Push.
+#              REMOVE THE PROJECT LOCALLY, then
+#              Try CHECKOUT - which should suceed.
+# --------------------------------------------
+test_case42: 
+	cd client; ./WTF create test2
+	echo "Test2, example 1 file" > client/test2/example1.txt
+	echo "Test2, example 2 file" > client/test2/example2.txt
+	echo "Test2, example 3 file" > client/test2/example3.txt
+	cd client; ./WTF add test2 example1.txt
+	cd client; ./WTF add test2 example2.txt
+	cd client; ./WTF add test2 example3.txt
+	cd client; ./WTF commit test2
+	cd client; ./WTF push   test2
+	# Now remove test2/example1.txt 
+	cd client; ./WTF remove test2 example1.txt
+	cd client; ./WTF commit test2
+	cd client; ./WTF push   test2
+	# test succeeded.
+
+# --------------------------------------------
+# Test Case 5: Create Two Projects Simultaneously: test1 & test2
+# --------------------------------------------
+test_case5: test_case4 test_case4a
+	# test succeeded: Successfully checked out example2.txt & exmaple3.txt in both projects test1 & test2
+
+# --------------------------------------------
+# Test Case 6: Test update/upgrade twice: Should succeed.
+# --------------------------------------------
+test_case6: test_case4
+	cd client; ./WTF update  test1
+	cd client; ./WTF upgrade test1
+
+	cd client; ./WTF update  test1
+	cd client; ./WTF upgrade test1
+	# Test succeeded.
+
+# --------------------------------------------
+# Test Case 7: Test Update with Conflicts: Should not fail.
+# --------------------------------------------
+test_case7: test_case4
+	# Introduce conflicts by changing client files.
+	cd client; echo "Test1, example 1 file, modified again" >> test1/example1.txt
+
+	# update should not fail
+	cd client; ./WTF update  test1
+	cd client; ./WTF upgrade test1
+
+# --------------------------------------------
+# Test Case 8: Test Update/Upgrade with Conflicts: New files on client side: Should not fail.
+# --------------------------------------------
+test_case8: test_case4
+	# Introduce conflicts, by adding new files on client
+	echo "Test1, example 4 file" > client/test1/example4.txt
+	echo "Test1, example 5 file" > client/test1/example5.txt
+	cd client; ./WTF add test1 example4.txt
+	cd client; ./WTF add test1 example5.txt
+
+	# update should not fail
+	cd client; ./WTF update  test1
+	cd client; ./WTF upgrade test1
+
+# --------------------------------------------
+# Test Case 9: Add same file twice. Should give error message.
+# --------------------------------------------
+test_case9: test_case4
+	cd client; ./WTF add test1 example1.txt
+
+# --------------------------------------------
+# Test Case 10: Test 'update/upgrade' with 2nd client
+# --------------------------------------------
+test_case10: test_case4 
+	# Create a 2'nd client 'Sam' & then checkout files for 'Sam'.
+	rm -rf client/Sam
+	cd client; mkdir Sam
+	cd client/Sam; ../WTF configure 127.0.0.1 8000
+	cd client/Sam; ../WTF checkout test1
+	# Client 1 Adds a new file, commits it & pushes it.
+	echo "Test1, example 5 file" > client/test1/example5.txt
+	cd client; ./WTF add test1 example5.txt
+	cd client; ./WTF commit test1
+	cd client; ./WTF push   test1
+	# Do Update/Upgrade for client 2.
+	cd client/Sam; ../WTF update  test1
+	cd client/Sam; ../WTF upgrade test1
+	# Client 2 successfully gets the new file: example5.txt
+
+#destroy
