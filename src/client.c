@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "src/accept.h"
@@ -24,12 +25,29 @@ Response* client_send(Request* request) {
     return response;
   }
 
-  int client_fd = client_open();
-  if (client_fd < 0) {
-    printf("[Client Error] Could not open a client connection.\n");
-    exit(1);
-    return NULL;
+  // "Client processes that cannot find the server should repeatedly try to
+  // connect every 3 seconds until killed"
+  int client_fd;
+  while ((client_fd = client_open()) < 0) {
+    printf(BRED "[Client Error]" RESET " Couldn't connect. Retrying ");
+
+    const char* dots[] = {".\b", "..\b\b", "...\b\b\b"};
+    int i = 0;
+    for (; i < 3; i++) {
+      printf("%s", dots[i]);
+      fflush(stdout);
+      sleep(1);
+    }
+
+    printf("\n");
   }
+  printf("\n");
+
+  // "Client announces completion of connection to server"
+  Configure* config = configure_read();
+  printf(BGRN "[Client Success]" RESET " Connected to server [at] %s" GRN
+              ":%s\n" RESET,
+         config->ip, config->port);
 
   request_write(client_fd, request);              // Write request
   Response* response = response_read(client_fd);  // Read response
@@ -42,6 +60,8 @@ int client_open() {
   Configure* config = configure_read();
 
   if (config == NULL || strlen(config->ip) == 0 || strlen(config->port) == 0) {
+    printf(BRED "[Configure Error]" RESET
+                " Could not read from `.configure`\n" RESET);
     printf("[Configure Error] Could not read .configure.");
     return -1;
   }
