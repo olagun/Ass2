@@ -95,10 +95,12 @@ Response* create_server(Request* request) {
   // Log
   if (!TESTING) {
     printf("\n");
-    printf("Created new project " BLU "%s" RESET "\n", request->project_name);
+    printf(BWHT "[Create]" RESET "Created new project " BLU "%s" RESET "\n",
+           request->project_name);
     printf("\n");
   }
 
+  // [Test Create Mutex]
   // sleep(5);
 
   // [Unlock] Project

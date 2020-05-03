@@ -21,7 +21,7 @@ void destroy_client(char* project_name) {
     return;
   }
 
-  printf("Destroyed project %s", project_name);
+  printf(BWHT "[Destroy]" RESET " Successfully destroyed '%s'\n", project_name);
 }
 
 Response* destroy_server(Request* request) {
@@ -51,6 +51,9 @@ Response* destroy_server(Request* request) {
   sprintf(s, "rm -rf projects/%s", project_name);
   system(s);
 
+  // [Test Destroy Mutex]
+  // sleep(5);
+
   // [Unlock] Project
   unlock_project(request->project_name);
 
@@ -58,7 +61,6 @@ Response* destroy_server(Request* request) {
   remove_project_mutex(request->project_name);
 
   Response* response = response_new();
-  response->status_code = 1;
-  response->message = "Success";
+  response->message = "[Destroy] Successfully destroyed project";
   return response;
 }
