@@ -60,7 +60,7 @@ void upgrade_client(char *project_name) {
   }
 
   if (update_files == NULL) {
-    printf(BWHT "[Upgrade]" RESET "Up To Date\n");
+    printf(BWHT "[Upgrade]" RESET " Up To Date\n");
     return;
   }
 

@@ -150,13 +150,23 @@ test_currentversion_nonexistent: build_client
 test_currentversion_valid: test_push
 	cd client; ./WTF currentversion test
 
+# destroy
+test_currentversion_nonexistent: build_client
+	cd client; ./WTF destroy madeup
+
+test_currentversion_valid: test_push
+	cd client; ./WTF destroy test
+
+# history
+test_history_nonexistent: test_case41
+	cd client; ./WTF history madeup
+
+test_history_valid: test_case41
+	cd client; ./WTF history test1
+# ****FAILED*****
 
 # --------------------------------------------
-# Test Case 4: Create one Project, Add files, Commit, Push.
-#              Then modify example1.txt, and remove example3.txt,
-#              Then Commit, Push.
-#              REMOVE THE PROJECT LOCALLY, then
-#              Try CHECKOUT - which should suceed.
+# Test Case 4: Create Project 'test1', Add files, Commit, Push.
 # --------------------------------------------
 test_case4: 
 	rm -rf client/test1
@@ -169,6 +179,15 @@ test_case4:
 	cd client; ./WTF add test1 example3.txt
 	cd client; ./WTF commit test1
 	cd client; ./WTF push   test1
+
+# --------------------------------------------
+# Test Case 4.1: Create Project 'test1', Add files, Commit, Push.
+#              Then modify example1.txt, and remove example3.txt,
+#              Then Commit, Push.
+#              REMOVE THE PROJECT LOCALLY, then
+#              Try CHECKOUT - which should suceed.
+# --------------------------------------------
+test_case41: test_case4
 	# Modify exmple1.txt
 	echo "Test1, example 1 file, modified" >> client/test1/example1.txt
 	# Remove exmple3.txt
@@ -181,15 +200,12 @@ test_case4:
 	cd client; ./WTF checkout test1
 	# test succeeded: Successfully checked out example2.txt, & the modified file exmaple1.txt. Correct files in .Manifest.
 
-
 # --------------------------------------------
-# Test Case 4a: Create one Project, Add files, Commit, Push.
+# Test Case 4.2: Create second Project 'test2', Add files, Commit, Push.
 #              Then modify example1.txt, and remove example3.txt,
 #              Then Commit, Push.
-#              REMOVE THE PROJECT LOCALLY, then
-#              Try CHECKOUT - which should suceed.
 # --------------------------------------------
-test_case42: 
+test_case42: test_case4
 	cd client; ./WTF create test2
 	echo "Test2, example 1 file" > client/test2/example1.txt
 	echo "Test2, example 2 file" > client/test2/example2.txt
@@ -217,7 +233,6 @@ test_case5: test_case4 test_case4a
 test_case6: test_case4
 	cd client; ./WTF update  test1
 	cd client; ./WTF upgrade test1
-
 	cd client; ./WTF update  test1
 	cd client; ./WTF upgrade test1
 	# Test succeeded.
@@ -228,7 +243,6 @@ test_case6: test_case4
 test_case7: test_case4
 	# Introduce conflicts by changing client files.
 	cd client; echo "Test1, example 1 file, modified again" >> test1/example1.txt
-
 	# update should not fail
 	cd client; ./WTF update  test1
 	cd client; ./WTF upgrade test1
@@ -242,7 +256,6 @@ test_case8: test_case4
 	echo "Test1, example 5 file" > client/test1/example5.txt
 	cd client; ./WTF add test1 example4.txt
 	cd client; ./WTF add test1 example5.txt
-
 	# update should not fail
 	cd client; ./WTF update  test1
 	cd client; ./WTF upgrade test1

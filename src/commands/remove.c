@@ -19,10 +19,12 @@ void remove_client(char *project_name, char *file_path) {
                 " Can't remove '%s' becuase it doesn't exist\n",
            full_path);
     return;
+    
   }
 
   Manifest *manifest = manifest_read(project_name);
   manifest->filelist = filelist_remove(manifest->filelist, file_path);
 
   manifest_write(project_name, manifest);
+  printf(BWHT "[Remove]" RESET " Successfully removed file '%s'\n", project_name);
 }
