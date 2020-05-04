@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "src/accept.h"
 #include "src/mutexlist.h"
@@ -15,7 +16,7 @@ bool TESTING = false;
 
 int server_fd;
 
-void on_exit() {
+void on_leave() {
   printf(BYEL "[Exit]" RESET " Closing server socket\n");
   close(server_fd);
   // printf(BYEL "[Exit]" RESET " Shutting down all threads\n");
@@ -59,7 +60,7 @@ void* on_connection(void* client_fd_ptr) {
 }
 
 int main(int argc, char** argv) {
-  atexit(on_exit);
+  atexit(on_leave);
   signal(SIGINT, on_interrupt);
 
   if (argc != 2) {
