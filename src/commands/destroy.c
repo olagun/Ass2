@@ -27,7 +27,7 @@ void destroy_client(char* project_name) {
 Response* destroy_server(Request* request) {
   char* project_name = request->project_name;
 
-  char* project_path = calloc(strlen(project_name) + 50, sizeof(char));
+  char project_path[1000] = {0};
   sprintf(project_path, "projects/%s", project_name);
 
   if (!directory_exists(project_path)) {
@@ -41,15 +41,9 @@ Response* destroy_server(Request* request) {
   lock_project(request->project_name);
 
   char s[1000] = {0};
-
-  sprintf(s, "rm -rf commits/%s", project_name);
-  system(s);
-
-  sprintf(s, "rm -rf history/%s", project_name);
-  system(s);
-
-  sprintf(s, "rm -rf projects/%s", project_name);
-  system(s);
+  sprintf(s, "rm -rf commits/%s", project_name), system(s);
+  sprintf(s, "rm -rf history/%s", project_name), system(s);
+  sprintf(s, "rm -rf projects/%s", project_name), system(s);
 
   // [Test Destroy Mutex]
   // sleep(5);

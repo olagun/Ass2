@@ -42,16 +42,16 @@ void* on_connection(void* client_fd_ptr) {
   bool is_create = strcmp(command_name, "create") == 0;
   bool is_destroy = strcmp(command_name, "destroy") == 0;
 
-
-  // Lock all programs that use 
+  // Lock if request includes a project name
+  // Don't lock "create" or "destroy" because they add and remove mutexes
   bool should_lock = includes_project && !is_create && !is_destroy;
 
-  // Lock Mutex
+  // [Lock] Mutex
   if (should_lock) lock_project(project_name);
 
   response_write(client_fd, on_accept(request));  // Write response
 
-  // Unlock Mutex
+  // [Unlock] Mutex
   if (should_lock) unlock_project(project_name);
 
   close(client_fd);

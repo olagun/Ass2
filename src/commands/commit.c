@@ -92,19 +92,19 @@ void commit_client(char *project_name) {
       if (is_removed_client) {
         // Append 'D <file/path> <server's hash>' to .Commit
         dprintf(commit_fd, "D %s %s\n", file_path, server_hash);
-        printf("D %s %s\n", file_path, server_hash);
+        printf("D %s\n", file_path);
       }
       // Modify Case
       else if (is_same_file && is_modified) {
         // Append 'M <file/path> <server's hash>' to .Commit
         dprintf(commit_fd, "M %s %s\n", file_path, server_hash);
-        printf("M %s %s\n", file_path, server_hash);
+        printf("M %s\n", file_path);
       }
       // Add Case
       else if (is_removed_server) {
-        // Append 'A <file/path> <server's hash>' to .Commit
+        // Append 'A <file/path> <client's hash>' to .Commit
         dprintf(commit_fd, "A %s %s\n", file_path, live_hash);
-        printf("A %s %s\n", file_path, live_hash);
+        printf("A %s\n", file_path);
       }
 
       // Conflict case
