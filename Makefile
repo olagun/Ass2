@@ -3,10 +3,21 @@ include_flags := -I includes/ -I /usr/local/opt/openssl/include/
 open_ssl_flags := -L /usr/local/opt/openssl/lib -lssl -lcrypto
 other_flags := -pthread -lz
 
-all: build build_pdf
-build: build_client build_server
-clean: clean_client clean_client2 clean_server clean_pdf clean_test 
+client: build_client
+server: build_server
+test: build_test
+pdf: build_pdf
 
+all: build_client build_client2 build_server build_test
+clean: clean_client clean_client2 clean_server clean_test
+
+# Run --- 
+run_server: build_server
+	cd server; ./WTFServer 8000
+
+run_test: build_test
+	cd test; ./WTFTest
+	
 # Build ---
 build_client: clean_client
 	gcc $(include_flags) $(other_flags) $(source_files) wtf_client.c -o WTF $(open_ssl_flags)
@@ -30,17 +41,9 @@ build_test: clean_test
 	rm -rf test
 	mkdir test
 	mv WTFTest test
-	cp -R answers test
 
 build_pdf: 
-	pandoc README.md -o README.pdf
-
-# Run --- 
-run_server: build_server
-	cd server; ./WTFServer 8000
-
-run_test: build_test
-	cd test; ./WTFTest
+	pandoc README.md -o README.pdf --wrap=preserve
 
 # Clean ---
 clean_test:

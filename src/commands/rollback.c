@@ -2,9 +2,13 @@
 #include "src/commands/rollback.h"
 
 #include <dirent.h>
+#include <fcntl.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "src/client.h"
+#include "src/compression.h"
 #include "src/util/directory_exists.h"
 
 void rollback_client(char* project_name, char* project_version) {
@@ -61,7 +65,8 @@ Response* rollback_server(Request* request) {
   // Fail if the rollback project version doesn't exist
   if (!directory_exists(version_path)) {
     Response* response = response_new();
-    response->message = "[Rollback Error] Could not find project version on the server.";
+    response->message =
+        "[Rollback Error] Could not find project version on the server.";
     response->status_code = -1;
     return response;
   }
@@ -98,18 +103,30 @@ Response* rollback_server(Request* request) {
   sprintf(sys_rm, "rm -rf projects/%s", project_name);
   system(sys_rm);
 
-  // Delete `.Commit` from the requested project version
-  // (`.Commit` is used to store previous commits for the `history` command)
-  char* sys_rm_c = calloc(strlen(project_name) * 2 + 50, sizeof(char));
-  sprintf(sys_rm_c, "rm -f history/%s/%d/.Commit", project_name,
+  // Decompress, write, and delete `.History`
+  char history_archive[1000] = {0};
+  sprintf(history_archive, "history/%s/%d/.History", project_name,
           rollback_version);
-  system(sys_rm_c);
 
-  // Move the requested project version to `projects/`
-  char* sys_mv = calloc(strlen(project_name) * 2 + 50, sizeof(char));
-  sprintf(sys_mv, "mv history/%s/%d projects/%s", project_name,
+  int open_fd = open(history_archive, O_RDONLY, 0777);
+
+  FileList* filelist = read_compressed_filelist(open_fd);
+  mkdir(project_path, 0777);
+  filelist_write(project_path, filelist);
+
+  close(open_fd);
+  remove(history_archive);
+
+  // Move `.Manifest`
+  char manifest_sys[1000] = {0};
+  sprintf(manifest_sys, "mv history/%s/%d/.Manifest projects/%s", project_name,
           rollback_version, project_name);
-  system(sys_mv);
+  system(manifest_sys);
+
+  // Remove folder
+  char sys_rm_h[1000] = {0};
+  sprintf(sys_rm_h, "rm -rf history/%s/%d", project_name, rollback_version);
+  system(sys_rm_h);
 
   Response* response = response_new();
   response->status_code = 1;

@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "src/client.h"
+#include "src/compression.h"
 #include "src/filelist.h"
 #include "src/read.h"
 #include "src/util/directory_exists.h"
@@ -111,57 +112,70 @@ Response* push_server(Request* request) {
   if (request->status_code == push_commit) {
     char* commit_hash = request->message;
 
-    char* commit_file_path = calloc(strlen(commit_hash) + 50, sizeof(char));
+    char project_path[1000] = {0};
+    sprintf(project_path, "projects/%s", project_name);
+
+    char commit_file_path[1000] = {0};
     sprintf(commit_file_path, "commits/%s/.Commit_%s", project_name,
             commit_hash);
 
-    // Make history folder
-    char* history_path = calloc(strlen(project_name) + 50, sizeof(char));
+    // Create history folder for project
+    char history_path[1000] = {0};
     sprintf(history_path, "history/%s", project_name);
     mkdir(history_path, 0777);
 
-    // Copy files into history
-    char* mv_project = calloc(strlen(project_name) + 50, sizeof(char));
-    // TODO(Sam): Add hash to history
-    sprintf(mv_project, "mv projects/%s history/%s/%d", project_name,
-            project_name, request->project_version - 1);
-    system(mv_project);
+    // Create history folder for version
+    sprintf(history_path, "history/%s/%d", project_name,
+            request->project_version - 1);
+    mkdir(history_path, 0777);
 
-    char* project_path = calloc(strlen(project_name) + 50, sizeof(char));
-    sprintf(project_path, "projects/%s", project_name);
+    // Write compressed current project files to history
+    char history_archive[1000] = {0};
+    sprintf(history_archive, "history/%s/%d/.History", project_name,
+            request->project_version - 1);
 
+    char manifest_archive[1000] = {0};
+    sprintf(manifest_archive, "history/%s/%d", project_name,
+            request->project_version - 1);
+
+    int write_fd = creat(history_archive, 0777);
+
+    Manifest* project_manifest = manifest_read(project_path);
+    manifest_write(manifest_archive, project_manifest);
+
+    FileList* list = project_manifest->filelist;
+    list = filelist_readbytes(project_path, list);
+    write_filelist_compressed(write_fd, list);
+
+    close(write_fd);
+
+    /* Remove old project folder, create project folder and write files and
+     * manifest */
+
+    // Remove old project
+    char project_sys[1000] = {0};
+    sprintf(project_sys, "rm -rf projects/%s", project_name);
+    system(project_sys);
+
+    // Create project folder and write files and manifest
     mkdir(project_path, 0777);
     filelist_write(project_path, request->filelist);
-
-    // Move commit file
-    char* mv_commit = calloc(strlen(commit_file_path) + 50, sizeof(char));
-    sprintf(mv_commit, "mv commits/%s/.Commit_%s history/%s/%d/.Commit",
-            project_name, commit_hash, project_name,
-            request->project_version - 1);
-    system(mv_commit);
-
     Manifest* manifest = manifest_new();
     manifest->project_version = request->project_version;
     manifest->filelist = request->filelist;
     manifest_write(project_path, manifest);
 
+    // Move commit file
+    char mv_commit[1000] = {0};
+    sprintf(mv_commit, "mv commits/%s/.Commit_%s history/%s/%d/.Commit",
+            project_name, commit_hash, project_name,
+            request->project_version - 1);
+    system(mv_commit);
+
     Response* response = response_new();
     response->message = "Awesome, committed!";
     response->project_version = manifest->project_version;
     return response;
-
-    // All files except for `.Manifest`
-    // Strategy: Make a copy of the current directory
-    // Delete all files
-    // Write all files
-
-    // system call to copy files
-    // delete direcotry
-    // recreate nd write all files
-    // make a new manifest file
-
-    // Add commt to thistory file nad move
-    // FileList* filest =
   }
 
   return NULL;
