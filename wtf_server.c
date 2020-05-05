@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "src/accept.h"
 #include "src/mutexlist.h"
@@ -15,7 +16,7 @@ bool TESTING = false;
 
 int server_fd;
 
-void on_exit() {
+void on_leave() {
   printf(BYEL "[Exit]" RESET " Closing server socket\n");
   close(server_fd);
   // printf(BYEL "[Exit]" RESET " Shutting down all threads\n");
@@ -42,16 +43,16 @@ void* on_connection(void* client_fd_ptr) {
   bool is_create = strcmp(command_name, "create") == 0;
   bool is_destroy = strcmp(command_name, "destroy") == 0;
 
-
-  // Lock all programs that use 
+  // Lock if request includes a project name
+  // Don't lock "create" or "destroy" because they add and remove mutexes
   bool should_lock = includes_project && !is_create && !is_destroy;
 
-  // Lock Mutex
+  // [Lock] Mutex
   if (should_lock) lock_project(project_name);
 
   response_write(client_fd, on_accept(request));  // Write response
 
-  // Unlock Mutex
+  // [Unlock] Mutex
   if (should_lock) unlock_project(project_name);
 
   close(client_fd);
@@ -59,7 +60,7 @@ void* on_connection(void* client_fd_ptr) {
 }
 
 int main(int argc, char** argv) {
-  atexit(on_exit);
+  atexit(on_leave);
   signal(SIGINT, on_interrupt);
 
   if (argc != 2) {

@@ -75,3 +75,43 @@ echo 'Exmaple 1 modified' >> proj1/ex1.txt
 
 # Test Case 16: 'Upgrade' the Project. Expect success.
 ../client/WTF upgrade proj1
+
+#Test Case 17: Modifing a Project file and attempting to Update
+open("client/ex1.txt", O_RDWR | O_APPEND, S_IRUSR | S_IWUSR | S_IXUSR)
+write(contents, "stuff", 5)
+close(contents)
+../client/WTF update proj1
+
+# Test Case 18: First delete project locally, then 'checkout' a project. Expect success
+rm -rf proj1
+../client/WTF checkout proj1
+
+# Test Case 19: Get currentversion of a project. Expect success.
+../client/WTF currentversion proj1
+
+# Test Case 20: Get currentversion of a project that does not exist. Expect failure.
+../client/WTF currentversion non_existent_project
+
+# Test Case 21: Get 'history' of a project. Expect success.
+../client/WTF history proj1
+
+# Test Case 22: Get 'history' of a project that does not exist. Expect failure.
+../client/WTF history non_existent_project
+
+# Test Case 23: 'checkout' a project when it already exists locally. Expect failure.
+../client/WTF checkout proj1
+
+# Test Case 24: 'rollback' an existing project. Expect success.
+../client/WTF rollback proj1 1
+
+# Test Case 25: 'rollback' a project that does not exist. Expect failure.
+../client/WTF rollback non_existent_project 1
+
+# Test Case 26: 'Destroy' the Project. Expect success.
+../client/WTF destroy proj1
+
+# Test case 27: Attempting to 'Destroy' the Project when it doesn't exist. Expect failure.
+../client/WTF destroy proj1
+
+# Test Case 28: 'checkout' a project after we have destryed the project. Expect failure.
+../client/WTF checkout proj1
