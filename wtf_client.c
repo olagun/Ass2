@@ -105,8 +105,8 @@ int main(int argc, char** argv) {
 
     destroy_client(argv[2]);
   } else if (strcmp(argv[1], "rollback") == 0) {
-    if (argc < 3) {
-      printf("Missing <project name>\n");
+    if (argc < 4) {
+      printf("Missing <project name> and <project version>\n");
       return 0;
     }
 
