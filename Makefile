@@ -27,6 +27,7 @@ build_server: clean_server
 
 build_test: clean_test
 	gcc $(include_flags) $(other_flags) $(source_files) wtf_test.c -o WTFTest $(open_ssl_flags)
+	rm -rf test
 	mkdir test
 	mv WTFTest test
 	cp -R answers test
@@ -151,10 +152,10 @@ test_currentversion_valid: test_push
 	cd client; ./WTF currentversion test
 
 # destroy
-test_currentversion_nonexistent: build_client
+test_destroy_nonexistent: build_client
 	cd client; ./WTF destroy madeup
 
-test_currentversion_valid: test_push
+test_destroy_valid: test_push
 	cd client; ./WTF destroy test
 
 # history

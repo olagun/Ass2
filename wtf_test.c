@@ -7,7 +7,8 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "src/commands/add.h"
 #include "src/commands/checkout.h"
 #include "src/commands/commit.h"
@@ -22,445 +23,315 @@
 
 bool TESTING = true;
 
-// printf "some text" | openssl sha256
-
-// add if (!TESTING) before print statements across the program
-
-// HELPER FUNCTIONS
-int total_num_tests = 0;
-int total_tests_passed = 0;
-
-int tests_passed = 0;
-int num_tests = 0;
-
-void start_tests() {
-  tests_passed = 0;
-  num_tests = 0;
+void system1(char* command) {
+  printf("%s\n", command);
+  system(command);
 }
 
-void end_tests() { total_tests_passed += tests_passed; }
-
-void print_result() { printf("%d/%d tests passed\n", tests_passed, num_tests); }
-
-// void print_total_result() { printf("%d/%d tests passed\n", tests_passed,
-// num_tests); }
-
-void print_header(char* command) {
-  printf("\ntesting " BWHT "%s" RESET "...\n", command);
-}
-
-void assert(char* test, bool val) {
-  num_tests++;
-
-  if (val) {
-    printf(GRN "(%d) passes '%s'\n" RESET, num_tests, test);
-    tests_passed++;
-  } else {
-    printf(RED "(%d) fails '%s'\n" RESET, num_tests, test);
-  }
-}
-
-bool file_eq(char* a, char* b) {
-  if (get_file_size(a) != get_file_size(b)) {
-    return false;
-  }
-
-  if (!file_exists(a) || !file_exists(b)) {
-    return false;
-  }
-
-  int fd_a = open(a, O_RDONLY, 0777);
-  int fd_b = open(a, O_RDONLY, 0777);
-
-  int bytes_read_a = 0;
-  int bytes_read_b = 0;
-
-  char* buff_a = calloc(1, sizeof(char));
-  char* buff_b = calloc(1, sizeof(char));
-
-  while ((bytes_read_a = read(fd_a, buff_a, 1)) > 0 &&
-         (bytes_read_b = read(fd_b, buff_b, 1)) > 0) {
-    if (buff_a[0] != buff_b[0]) {
-      close(fd_a);
-      close(fd_b);
-      return false;
-    }
-  }
-
-  close(fd_a);
-  close(fd_b);
-  return true;
-}
-
-// SETUP
-void setup_server() {
-  mkdir("server", 0777);
-  chdir("server");
-
-  // Create folders to organize server
-  mkdir("projects", 0777);  // Stores projects
-  mkdir("history", 0777);   // Stores old projects
-  mkdir("commits", 0777);   // Stores `.Commit` files
-
-  chdir("../");
-}
-void setup_client() { mkdir("client", 0777); }
-void clean_client() { system("rm -rf client"); }
-void clean_server() { system("rm -rf server"); }
-
-// RUN
-Configure* run_configure() {
-  chdir("client");
-
-  configure_write("127.0.0.1", "8000");
-  Configure* configure = configure_read();
-
-  chdir("../");
-  return configure;
-}
-
-void run_create(char* proj) {
-  chdir("client");
-  create_client(proj);
-  chdir("../");
-}
-
-void run_add(char* project_name, char* file_name) {
-  char* sys_cp = calloc(strlen(project_name) + 50, sizeof(char));
-  sprintf(sys_cp, "cp answers/files/%s client/%s", file_name, project_name);
-  system(sys_cp);
-
-  chdir("client");
-  add_client(project_name, file_name);
-  chdir("../");
-}
-
-void run_remove(char* project_name, char* file_name) {
-  chdir("client");
-  remove_client(project_name, file_name);
-  chdir("../");
-}
-
-void run_checkout(char* proj) {
-  char s[1000];
-
-  sprintf(s, "server/projects/%s", proj);
-  mkdir(s, 0777);
-
-  // Move files to server (instead of using push)
-  sprintf(s, "cp -R answers/checkout/ server/projects/%s", proj);
-  system(s);
-
-  chdir("client");
-  checkout_client(proj);
-  chdir("../");
-}
-
-// configure
-void test_configure() {
-  print_header("configure");
-
-  // Setup
-  setup_client();
-  setup_server();
-
-  // Run
-  run_create("test");
-  Configure* config = run_configure();
-
-  // Test
-  start_tests();
-  assert("writes to .configure", file_exists("client/.configure"));
-  assert("reads from .configure", strcmp(config->ip, "127.0.0.1") == 0 &&
-                                      strcmp(config->port, "8000") == 0);
-  end_tests();
-  print_result();
-
-  // Cleanup
-  remove(".configure");
-  clean_server();
-  clean_client();
-}
-
-// checkout
-void test_checkout() {
-  print_header("checkout");
-
-  setup_server();
-  setup_client();
-
-  run_configure();
-  run_checkout("test");
-
-  start_tests();
-  assert("correctly checks out manifest",
-         file_eq("client/test/.Manifest", "server/projects/test/.Manifest"));
-  assert(
-      "correctly checks out file",
-      file_eq("client/test/example1.txt", "server/projects/test/example1.txt"));
-  end_tests();
-  print_result();
-
-  clean_server();
-  clean_client();
-}
-
-// update
-void test_update() {
-  print_header("update");
-
-  setup_server();
-  setup_client();
-
-  // run_configure();
-  // run_checkout("test");
-
-  // start_tests();
-  // assert("correctly checks out manifest",
-  //        file_eq("client/test/.Manifest", "server/projects/test/.Manifest"));
-  // assert(
-  //     "correctly checks out file",
-  //     file_eq("client/test/example1.txt",
-  //     "server/projects/test/example1.txt"));
-  // end_tests();
-  // print_result();
-
-  clean_server();
-  clean_client();
-}
-
-// Create
-void test_create() {
-  print_header("create");
-
-  // Setup
-  setup_server();
-  setup_client();
-
-  // Run
-  run_create("test");
-
-  // Test
-  start_tests();
-
-  assert("creates manifest on server",
-         file_exists("server/projects/test/.Manifest"));
-
-  assert("creates manifest on client", file_exists("client/test/.Manifest"));
-
-  chdir("client");
-  Manifest* manifest = manifest_read("test");
-  chdir("../");
-  assert("manifest version is 0", manifest->project_version == 0);
-
-  end_tests();
-  print_result();
-
-  // Cleanup
-  clean_server();
-  clean_client();
-}
-
-// Add
-void test_add() {
-  print_header("add");
-
-  // Setup
-  setup_server();
-  setup_client();
-
-  // Run
-  run_create("test");
-  run_add("test", "example1.txt");
-
-  // Test
-  start_tests();
-
-  chdir("client");
-  Manifest* manifest = manifest_read("test");
-  chdir("../");
-  assert("adds one file to manifest", filelist_size(manifest->filelist) == 1);
-
-  // assert("adds one file to manifest",
-  //      manifest->filelist && manifest->filelist->file_version == 0);
-
-  end_tests();
-  print_result();
-
-  // Cleanup
-  clean_server();
-  clean_client();
-}
-
-// Remove
-void test_remove() {
-  print_header("remove");
-
-  // Setup
-  setup_server();
-  setup_client();
-
-  // Run
-  run_create("test");
-  run_add("test", "example1.txt");
-  run_remove("test", "example1.txt");
-
-  // Test
-  start_tests();
-
-  // assert(
-  //     "correctly removes file from client",
-  //     file_eq("client/test/.Manifest",
-  //     "answers/remove/client/test/.Manifest"));
-  end_tests();
-  print_result();
-
-  // Cleanup
-  clean_server();
-  clean_client();
-}
-
-// Current Version
-// test after doing push/commit
-void test_currentversion() {
-  print_header("currentversion");
-
-  // // Setup
-  // setup_server();
-  // setup_client();
-
-  // // Run
-  // chdir("client");
-  // Request* request = request_new();
-  // request->command_name = "currentversion";
-  // request->project_name = "test";
-  // Response* response = on_accept(request);
-
-  // FileList* files = response->filelist;
-
-  // Test
-  start_tests();
-  // assert("prints version 0 after create",
-  //        file_eq("client/test/.Manifest",
-  //        "answers/currentversion/after_create/.Manifest"));
-  end_tests();
-  print_result();
-
-  // Cleanup
-  // clean_server();
-  // clean_client();
-}
-
-void run_commit(char* project_name) {
-  chdir("client");
-  commit_client(project_name);
-  chdir("../");
-}
-
-// test regular push
-// test every scenario where upgrade is needed
-void test_commit() {
-not_on_server : {
-  // Setup
-  setup_server();
-  setup_client();
-
-  // Run
-  run_commit("test");
-
-  // Tests
-  assert("[add case] doesn't commit if the project doesn't exist on the server",
-         directory_exists("server/commits/test") == false);
-
-  // Cleanup
-  clean_server();
-  clean_client();
-}
-
-add_case : {
-  // Setup
-  setup_server();
-  setup_client();
-
-  // Run
-  run_create("test");
-  run_add("test", "example1.txt");
-  run_commit("test");
-
-  // Tests
-  // assert("[add case] adds correct `.Commit` file to server",
-  //       file_eq(
-  //         "server/commits/test/.Commit_39675dfa2511a96c7cce0c45d0347802dbe5fcdaf0794f5cd21cc69084d260c1",
-  //         "answers/commit/add_case/.Commit"));
-
-  // Cleanup
-  clean_server();
-  clean_client();
-}
-
-modify_case : {
-  // Setup
-  setup_server();
-  setup_client();
-
-  // // Run
-  // run_create();
-  // run_add();
-  // run_commit();
-
-  // // Modify file
-  // system("cp answers/commit/modify_case/file.txt client/test/file.txt")
-
-  // run_add();
-  // run_commit();
-
-  // // Tests
-  // assert("[add case] adds correct `.Commit` file to server",
-  //       file_eq(
-  //         "server/commits/test/.Commit_39675dfa2511a96c7cce0c45d0347802dbe5fcdaf0794f5cd21cc69084d260c1",
-  //         "answers/commit/add_case/.Commit"));
-
-  // Cleanup
-  clean_server();
-  clean_client();
-}
-
-delete_case : {}
-}
-
-void test_push() {
-  //  chdir("client");
-  //  Manifest* manifest= manifest_read("test");
-  // chdir("../");
-  // These should be in push no commit. The assignment description must be
-  // wrong. otherwise every single commit would increment the version number not
-  // every push. assert("[add case] increments client manifest project version
-  // number",
-  //       manifest->project_version == 1);
-
-  // assert("[add case] increments client manifest file version number",
-  //       manifest->filelist != NULL && manifest->filelist->file_version == 1);
-}
-
-void test_history() {}
-
-void test_rollback() {}
-
-void test_upgrade() {}
-
-void test_destroy() {}
-
-int main(int argc, char** argv) {
-  test_configure();
-  test_checkout();
-  test_update();
-
-  // test_create();
-  // test_add();
-  // test_remove();
-
-  // test_currentversion();
-  // test_commit();
-
-  return 0;
+int main(int argc, char** argv){
+	int i;
+  char junk;
+  int* wstatus;
+
+//TESTING CONFIGURE ---------------------------------
+  system("pwd");
+
+  printf("Test Case -1: 'checkout' project without running configure. Expect failure.\n");
+  scanf("%c", &junk);
+  i = fork();
+	if(!i){
+		system1("../client/WTF checkout non_existent_project");
+		exit(0);
+	}
+  wait(wstatus);
+
+	printf("Test Case 1: Configure. Expect success.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+ 		system1("../client/WTF configure 127.0.0.1 8000");
+		exit(0);
+	}
+	wait(wstatus);
+
+//TESTING CREATE -----------------------------------
+	printf("Test Case 2: 'Create' project. Expect success.\n");
+  scanf("%c", &junk);
+ 	i = fork();
+	if(!i){
+		system1("../client/WTF create proj1");
+		exit(0);
+	}
+	wait(wstatus);
+  
+
+	printf("Test Case 3: 'Create' project when it already exists. Expect failure.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("../client/WTF create proj1");
+		exit(0);
+	}
+	wait(wstatus);
+  
+
+//TESTING ADD -----------------------------------
+	printf("Test Case 4: 'Add' three files to the project. Expect success.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("echo 'example file 1' > proj1/ex1.txt");
+		system1("echo 'example file 2' > proj1/ex2.txt");
+    system1("echo 'example file 3' > proj1/ex3.txt");
+		system1("../client/WTF add proj1 ex1.txt");
+		system1("../client/WTF add proj1 ex2.txt");
+		system1("../client/WTF add proj1 ex3.txt");
+		exit(0);
+	}
+	wait(wstatus);
+ 
+
+	printf("Test Case 5: Attempt to 'Add' a file that is already in the project. Expect failure.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("../client/WTF add proj1 ex1.txt");
+		exit(0);
+	}
+	wait(wstatus);
+ 
+//TESTING COMMIT AND PUSH --------------------------
+
+  printf("Test Case 6: Attempt to 'Push' without a .commit file. Expect faiure.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("../client/WTF push proj1");
+		exit(0);
+	}
+	wait(wstatus);
+ 
+  printf("Test Case 7: 'Commit' the project. Expect success.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("../client/WTF commit proj1");
+		exit(0);
+	}
+	wait(wstatus);
+
+
+  printf("Test Case 8: 'Push' the project after commit. Expect success.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("../client/WTF push proj1");
+		exit(0);
+	}
+	wait(wstatus);
+
+
+  printf("Test Case 9: Attempting to 'commit' the project without any differences. Expect success.\n");
+  scanf("%c", &junk);
+  i = fork();
+	if(!i){
+		system1("../client/WTF commit proj1");
+		exit(0);
+	}
+	wait(wstatus);
+
+
+  printf("Test Case 10: Modify a file ex1.txt, then 'commit' & 'push'. Expect success.\n");
+  scanf("%c", &junk);  
+	i = fork();
+	if(!i){
+		system1("echo 'Exmaple 1 modified' >> proj1/ex1.txt");
+		system1("../client/WTF commit proj1");
+		system1("../client/WTF push   proj1");
+		exit(0);
+	}
+	wait(wstatus);
+
+//TESTING UPGRADE AND UPDATE--------------------------------------------
+  printf("Test Case 11: Attempting to 'Upgrade' the Project without a .update file. Expect failure.\n");
+  scanf("%c", &junk);  
+	i = fork();
+	if(!i){
+    system1("../client/WTF upgrade proj1");
+		exit(0);
+	}
+	wait(wstatus);
+
+  printf("Test Case 12: Attempting to 'Update' the Project without any removed Project files. Expect 'Up to date'.\n");
+  scanf("%c", &junk);  
+	i = fork();
+	if(!i){
+    system1("../client/WTF update proj1");
+		exit(0);
+	}
+	wait(wstatus);
+
+
+//TESTING REMOVE--------------------------------------------
+  printf("Test Case 13: 'Remove' a Project file. Expect success.\n");
+  scanf("%c", &junk);  
+	i = fork();
+	if(!i){
+    system1("../client/WTF remove proj1 ex1.txt");
+		exit(0);
+	}
+	wait(wstatus);
+
+  printf("Test Case 14: Attempting to 'Remove' a file that is not being tracked. Expect failure.\n");
+  scanf("%c", &junk);  
+	i = fork();
+	if(!i){
+    system1("../client/WTF remove proj1 ex1.txt");
+		exit(0);
+	}
+	wait(wstatus);
+
+  printf("Test Case 15: Removing Project files, then Update the Project. Expect success.\n");
+  scanf("%c", &junk);  
+	i = fork();
+	if(!i){
+    system1("../client/WTF update proj1 ex1.txt");
+		exit(0);
+	}
+	wait(wstatus);
+
+  printf("Test Case 16: 'Upgrade' the Project. Expect success.\n");
+  scanf("%c", &junk);  
+	i = fork();
+	if(!i){
+    system1("../client/WTF upgrade proj1");
+		exit(0);
+	}
+	wait(wstatus);
+
+  printf("Test Case 17: Modifing a Project file and attempting to Update\n");
+  scanf("%c", &junk); 
+	i = fork();
+	if(!i){
+		int contents = open("client/ex1.txt", O_RDWR | O_APPEND, S_IRUSR | S_IWUSR | S_IXUSR);
+		write(contents, "stuff", 5);
+		close(contents);
+		system1("../client/WTF update proj1");
+		exit(0);
+	}
+	wait(wstatus); 
+
+
+  // CHECKOUT 
+  printf("Test Case 18: First delete project locally, then 'checkout' a project. Expect success.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("rm -rf proj1");
+    system1("../client/WTF checkout proj1");
+		exit(0);
+	}
+  wait(wstatus);
+
+  // current version
+  printf("Test Case 19: Get currentversion of a project. Expect success.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("../client/WTF currentversion proj1");
+		exit(0);
+	}
+  wait(wstatus);
+
+  printf("Test Case 20: Get currentversion of a project that does not exist. Expect failure.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("../client/WTF currentversion non_existent_project");
+		exit(0);
+	}
+  wait(wstatus);
+
+  // history
+  printf("Test Case 21: Get 'history' of a project. Expect success.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("../client/WTF history proj1");
+		exit(0);
+	}
+  wait(wstatus);
+
+  printf("Test Case 22: Get 'history' of a project that does not exist. Expect failure.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("../client/WTF history non_existent_project");
+		exit(0);
+	}
+  wait(wstatus);
+
+
+  printf("Test Case 23: 'checkout' a project when it already exists locally. Expect failure.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("../client/WTF checkout proj1");
+		exit(0);
+	}
+  wait(wstatus);
+
+  // rollback
+  printf("Test Case 24: 'rollback' an existing project. Expect success.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("../client/WTF rollback proj1 1");
+		exit(0);
+	}
+  wait(wstatus);
+
+  printf("Test Case 25: 'rollback' a project that does not exist. Expect failure.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("../client/WTF rollback non_existent_project 1");
+		exit(0);
+	}
+  wait(wstatus);
+
+  // destroy ...............
+  printf("Test Case 26: 'Destroy' the Project. Expect success.\n");
+  scanf("%c", &junk); 
+	i = fork();
+	if(!i){
+		system1("../client/WTF destroy proj1");
+		exit(0);
+	}
+	wait(wstatus);
+	
+
+	printf("Test case 27: Attempting to 'Destroy' the Project when it doesn't exist. Expect failure.\n");
+  scanf("%c", &junk); 
+  i = fork();
+	if(!i){
+		system1("../client/WTF destroy proj1");
+		exit(0);
+	}
+	wait(wstatus);
+
+
+  printf("Test Case 28: 'checkout' a project after we have destryed the project. Expect failure.\n");
+  scanf("%c", &junk);
+	i = fork();
+	if(!i){
+		system1("../client/WTF checkout proj1");
+		exit(0);
+	}
+  wait(wstatus);
+
+
+
+
+  printf("End of tests. Bye!\n");
 }

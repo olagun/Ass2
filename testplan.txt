@@ -1,117 +1,117 @@
+#!/bin/zsh 
+# if you copy this file into a testplan.zsh file, you can execute the file directly
+cd Ass2
+make all
+
+# Open first terminal
+cd Ass2
+make all
+make run_server
+
+# Open second terminal
+cd Ass2
+mkdir test
+cd test
+
+# ------------------------
+# Manual Testing sequence
+# ------------------------
 
 
-Checkout
-We tested the following cases:
--done: Client requests a project that does not exist. 
-Result: Error message returned by server to client. Client exits with error and informs user.
--done: Client requests a project that already exists on the client side. 
-Result: Client prints error and informs user that project already exists on the client side.
--done: Checkout is called without running configure first.
-Result: Error message returned by server to client.
--done: Client requests a valid project. 
-Result: Server sends compressed file containing project. Client fully decompresses file and creates the directory and all files within it according to manifest received in the single transferred file.
+# Test Case -1: 'checkout' project without running configure. Expect failure.
+../client/WTF checkout non_existent_project
 
-Update 
--Client tries to update a project that does not exist on the server. 
-Result: Error message returned by server to client. Client exits with error and informs user.
--Update checks for each of these cases:
--M (for modify) and the full path/file name- for a file that both the server and client have, but the server's .Manifest version and file version are different than
- the client's, and the client's live hash of the file is the same as in its .Manifest.
--A (for added) and the full path/file name- for a file that is in the server's .Manifest, but not the client's and the server's .Manifest is a different version than the client's
--D (for deleted) and the full path/file name- for a file that is not in the server's .Manifest, but is in the client's and the server's .Manifest is a different version than the client'
-and checked that the .Update file contained the corresponding letter, version, filepath, and hash.
-The following cases return errors:
--.Manifest is the same for server and client, and file version is different (which should be impossible).
--.Manifest is different for server and client, file versions are different, and the hash is different.
-The errors are printed to STDOUT.
+# Test Case 1: Configure. Expect success.
+../client/WTF configure 127.0.0.1 8000
 
-Upgrade
--Client tries to upgrade a project that does not exist on the server. 
-Result: Error message returned by server to client. Client exits with error and informs user.
--Client calls upgrade for a project but .Update file does not exist for that project. 
-Result: Client exits with error and informs user to run Update first.
--Client calls upgrade for a project with a blank .Update file. 
-Result: Client informs user that the project is up to date and deletes .Update file.
--Client calls upgrade for a project with a valid .Update file. 
-Result: The client applies the changes listed in the .Update to the client's local copy of the project. It deletes the entry from the 
-client's .Manifest for all files tagged with a “D” and fetches from the server and writes or overwrites all files on the client side that
-are tagged with a “M” or “A”, respectively. When it is done processing all updates listed in it, the client deletes the .Update file.
+# Test Case 2: 'Create' project. Expect success.\n");
+../client/WTF create proj1
 
-Commit
-We tested the following cases:
--done: Client tries to commit a project that does not exist on the server. 
-Result: Error message returned by server to client. Client exits with error and informs user.
-Cases that pass without error:
-1. done: files that are in the server's .Manifest that are not in the client's (indicating they should be removed from the repository)
-2. done: files that are in the client's .Manifest that are not in the server's(indicating they should be added to the repository)
-3. files that are in both .Manifests, but also have an entry in the client's newly-written .Commit with a higher version number(indicating the client has a newer version than the server
-In these cases, the server creates a .commit file with the changes. We tested to make sure that additional .Commit were created if a .Commit for a project already 
-existed. We tested having a blank .Update file and got the server to still create the .Commit as expected. When the .Update was not blank, the 
-client printed error to the user.
-We tested the following error case:
--Files in the server's .Manifest that have a different hashcode than the client's whose version number are not lower than the client's. Result: commit fails 
-with a message that the client must sync with the repository before committing changes.
+# Test Case 3: 'Create' project when it already exists. Expect failure.
+../client/WTF create proj1
 
-Push
-We tested the following cases:
--Client tries to commit a project that does not exist on the server. 
-Result: Error message returned by server to client. Client exits with error and informs user.
--.Commit does not exist on server/client. Result: Server/client returns error and the client reports error to the user.
--Client sends differing .Commit file to the server. Result: Server returns error and client exits with error and informs user.
--Valid input. Result: Server deletes all other .commit files for the project. Server compresses backup of current version. Server writes all files
-from compressed file client sent to project folder, overwriting any existing files. Server updates manifest and increments version.
+# Test Case 4: 'Add' three files to the project. Expect success.
+echo 'example file 1' > proj1/ex1.txt
+echo 'example file 2' > proj1/ex2.txt
+echo 'example file 3' > proj1/ex3.txt
+../client/WTF add proj1 ex1.txt
+../client/WTF add proj1 ex2.txt
+../client/WTF add proj1 ex3.txt
 
-Create
-We tested the following cases:
--Try creating a project that does not exist. 
-Result: Error message returned by server to client. Client exits with error and informs user.
--Create a valid project. 
-Result: Server sends compressed manifest over with default version (=1). Client creates .manifest file with this decompressed data.
--Create a project that already exists: 
-Result: Error message returned by server to client. Client exits with error and informs user.
+# Test Case 5: Attempt to 'Add' a file that is already in the project. Expect failure.
+../client/WTF add proj1 ex1.txt
 
-Destroy
-We tested the following cases:
--done: Try destroying a project that does not exist. 
-Result: Error message returned by server to client. Client exits with error and informs user.
--done: Destroying a valid project. 
-Result: Server deletes project directory.
+# Test Case 6: Attempt to 'Push' without a .commit file. Expect faiure.\n");
+ ../client/WTF push proj1
 
-Add
-We tested the following cases:
--Try adding file that does not exist in the project folder or the manifest does exists. 
-Result: Error caught and printed to terminal. Manifest stays unchanged.
--Add valid file that exists in the project folder. 
-Result: Line added to manifest with version number, filename, and hash of file data.
--Add file that exists in the project folder and already exists in the manifest. 
-Result: If the hash matches, file version in manifest stays the same. Otherwise, the version number is incremented and the newer hash replaces the old hash.
+# Test Case 7: 'Commit' the project. Expect success.
+../client/WTF commit proj1
 
-Remove
-We tested the following cases:
--Try removing file that does not exist in the project folder or the manifest does not exists. 
-Result: Error caught and printed to terminal. Manifest stays unchanged.
--Remove valid file that exists in the project folder. 
-Result: Line removed from manifest.
+# Test Case 8: 'Push' the project after commit. Expect success.
+../client/WTF push proj1
 
-CurrentVersion
--done: Request version for a project that does not exist. 
-Result: Error message returned by server. Client exits with error and informs user.
--Request valid project version. 
-Result: Client outputs a list of all files under the project name, along with their version number
+# Test Case 9: Attempting to 'commit' the project without any differences. Expect success.\n");
+../client/WTF commit proj1
 
-History
--done: Request history for a project that does not exist. 
-Result: Error message returned by server. Client exits with error and informs user.
--done: Request valid history. 
-Result: The server sends over a compressed file containing the history of all operations performed on all successful pushes since the project's 
-creation, that is, it sends the .History file. The client receives the file, decompresses it, parses it, and outputs each version number, each push's 
-changes, and newline separating each push's log of changes.
+# Test Case 10: Modify a file ex1.txt, then 'commit' & 'push'. Expect success.\n");
+echo 'Exmaple 1 modified' >> proj1/ex1.txt
+../client/WTF commit proj1
+../client/WTF push   proj1
 
-Rollback
--done: Request rollback for a project that doesn't exist.
-Result: Error message returned by server. Client exits with error and informs user.
--done: Request rollback for a project with an invalid version number. 
-Result: Error message returned by server. Client exits with error and informs user.
--done: Request valid rollback. Result: Server deletes all newer versions than the specified version. Server decompresses specified version and returns success to client. Client outputs success to user.
+# Test Case 11: Attempting to 'Upgrade' the Project without a .update file. Expect failure.
+../client/WTF upgrade proj1
 
+# Test Case 12: Attempting to 'Update' the Project without any removed Project files. Expect 'Up to date'.\n");
+../client/WTF update proj1
 
+# Test Case 13: 'Remove' a Project file. Expect success.
+../client/WTF remove proj1 ex1.txt
+
+# Test Case 14: Attempting to 'Remove' a file that is not being tracked. Expect failure.
+../client/WTF remove proj1 ex1.txt
+
+# Test Case 15: Removing Project files, then Update the Project. Expect success.
+ ../client/WTF update proj1 ex1.txt
+
+# Test Case 16: 'Upgrade' the Project. Expect success.
+../client/WTF upgrade proj1
+
+#Test Case 17: Modifing a Project file and attempting to Update
+open("client/ex1.txt", O_RDWR | O_APPEND, S_IRUSR | S_IWUSR | S_IXUSR)
+write(contents, "stuff", 5)
+close(contents)
+../client/WTF update proj1
+
+# Test Case 18: First delete project locally, then 'checkout' a project. Expect success
+rm -rf proj1
+../client/WTF checkout proj1
+
+# Test Case 19: Get currentversion of a project. Expect success.
+../client/WTF currentversion proj1
+
+# Test Case 20: Get currentversion of a project that does not exist. Expect failure.
+../client/WTF currentversion non_existent_project
+
+# Test Case 21: Get 'history' of a project. Expect success.
+../client/WTF history proj1
+
+# Test Case 22: Get 'history' of a project that does not exist. Expect failure.
+../client/WTF history non_existent_project
+
+# Test Case 23: 'checkout' a project when it already exists locally. Expect failure.
+../client/WTF checkout proj1
+
+# Test Case 24: 'rollback' an existing project. Expect success.
+../client/WTF rollback proj1 1
+
+# Test Case 25: 'rollback' a project that does not exist. Expect failure.
+../client/WTF rollback non_existent_project 1
+
+# Test Case 26: 'Destroy' the Project. Expect success.
+../client/WTF destroy proj1
+
+# Test case 27: Attempting to 'Destroy' the Project when it doesn't exist. Expect failure.
+../client/WTF destroy proj1
+
+# Test Case 28: 'checkout' a project after we have destryed the project. Expect failure.
+../client/WTF checkout proj1

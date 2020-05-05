@@ -23,8 +23,12 @@ void remove_client(char *project_name, char *file_path) {
   }
 
   Manifest *manifest = manifest_read(project_name);
-  manifest->filelist = filelist_remove(manifest->filelist, file_path);
-
-  manifest_write(project_name, manifest);
-  printf(BWHT "[Remove]" RESET " Successfully removed file '%s'\n", project_name);
+  FileList* maifest_file = get_file_from(manifest->filelist, file_path);
+  if(maifest_file !=NULL ) {
+    manifest->filelist = filelist_remove(manifest->filelist, file_path);
+    manifest_write(project_name, manifest);
+    printf(BWHT "[Remove]" RESET " Successfully removed file '%s'\n", file_path);
+  } else {
+      printf(BRED "[Remove Error]" RESET " File '%s' does not exist.\n", file_path);
+  }
 }
