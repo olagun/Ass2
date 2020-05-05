@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "src/compression.h"
 #include "src/filelist.h"
 #include "src/read.h"
 #include "src/util/color.h"
@@ -25,18 +26,23 @@ void response_write(int fd, Response* response) {
   dprintf(fd, "%s:", response->message);          // <message>:
   dprintf(fd, "%d:", response->status_code);      // <status_code>:
   dprintf(fd, "%d:", response->project_version);  // <project_version>:
-  dprintf(fd, "%d:", response->file_count);       // <file_count>:
 
-  FileList* item = response->filelist;
-  while (item != NULL) {                           // Write every file
-    dprintf(fd, "%s:", item->file_path);           // <file_path>:
-    dprintf(fd, "%d:", item->file_version);        // <file_version>:
-    dprintf(fd, "%s:", item->file_hash);           // <file_hash>:
-    dprintf(fd, "%d:", item->file_size);           // <file_size>:
-    write(fd, item->file_bytes, item->file_size);  // <file_bytes>
+  // Compress files
+  write_filelist_compressed(fd, response->filelist);
 
-    item = item->next;
-  }
+  // Without compression
+  // dprintf(fd, "%d:", response->file_count);       // <file_count>:
+
+  // FileList* item = response->filelist;
+  // while (item != NULL) {                           // Write every file
+  //   dprintf(fd, "%s:", item->file_path);           // <file_path>:
+  //   dprintf(fd, "%d:", item->file_version);        // <file_version>:
+  //   dprintf(fd, "%s:", item->file_hash);           // <file_hash>:
+  //   dprintf(fd, "%d:", item->file_size);           // <file_size>:
+  //   write(fd, item->file_bytes, item->file_size);  // <file_bytes>
+
+  //   item = item->next;
+  // }
 
   response_log(response);
 }
@@ -53,20 +59,25 @@ Response* response_read(int fd) {
   response->message = read_until(fd, ':');                // <message>:
   response->status_code = atoi(read_until(fd, ':'));      // <status_code>:
   response->project_version = atoi(read_until(fd, ':'));  // <project_version>:
-  response->file_count = atoi(read_until(fd, ':'));       // <file_count>:
 
-  int n = response->file_count;
-  for (; n > 0; n--) {  // Read in every file
-    FileList* item = filelist_new();
-    item->file_path = read_until(fd, ':');                // <file_path>:
-    item->file_version = atoi(read_until(fd, ':'));       // <file_version>:
-    item->file_hash = read_until(fd, ':');                // <file_hash>:
-    item->file_size = atoi(read_until(fd, ':'));          // <file_size>:
-    item->file_bytes = read_nbytes(fd, item->file_size);  // <file_bytes>
+  // Decompress files
+  response->filelist = read_compressed_filelist(fd);
 
-    // Append item to list
-    response->filelist = filelist_append(response->filelist, item);
-  }
+  // Without compression
+  // response->file_count = atoi(read_until(fd, ':'));       // <file_count>:
+
+  // int n = response->file_count;
+  // for (; n > 0; n--) {  // Read in every file
+  //   FileList* item = filelist_new();
+  //   item->file_path = read_until(fd, ':');                // <file_path>:
+  //   item->file_version = atoi(read_until(fd, ':'));       // <file_version>:
+  //   item->file_hash = read_until(fd, ':');                // <file_hash>:
+  //   item->file_size = atoi(read_until(fd, ':'));          // <file_size>:
+  //   item->file_bytes = read_nbytes(fd, item->file_size);  // <file_bytes>
+
+  //   // Append item to list
+  //   response->filelist = filelist_append(response->filelist, item);
+  // }
 
   response_log(response);
 
@@ -101,4 +112,5 @@ void response_log(Response* response) {
   }
 
   printf("╰─\n");
+  printf("\n");
 }

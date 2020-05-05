@@ -12,11 +12,11 @@ char* get_file_hash(char* project_name, char* file_path) {
   filelist->file_path = file_path;
   filelist = filelist_readbytes(project_name, filelist);
 
-  char* file_bytes = filelist->file_bytes;
+  unsigned char* file_bytes = filelist->file_bytes;
   int file_size = filelist->file_size;
 
   unsigned char* raw_hash =
-      SHA256((unsigned const char*)file_bytes, file_size, 0);
+      SHA256(file_bytes, file_size, 0);
   char* hex_hash = calloc(SHA256_DIGEST_LENGTH * 2 + 1, sizeof(char));
 
   int i = 0;

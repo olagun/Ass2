@@ -95,7 +95,7 @@ Response* create_server(Request* request) {
   // Log
   if (!TESTING) {
     printf("\n");
-    printf(BWHT "[Create]" RESET "Created new project " BLU "%s" RESET "\n",
+    printf(BWHT "[Create]" RESET " Created new project " BLU "%s" RESET "\n",
            request->project_name);
     printf("\n");
   }

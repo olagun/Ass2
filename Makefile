@@ -1,7 +1,7 @@
 source_files := $(wildcard src/*.c) $(wildcard src/commands/*.c) $(wildcard src/util/*.c)
 include_flags := -I includes/ -I /usr/local/opt/openssl/include/ 
 open_ssl_flags := -L /usr/local/opt/openssl/lib -lssl -lcrypto
-other_flags := -pthread
+other_flags := -pthread -lz
 
 all: build build_pdf
 build: build_client build_server

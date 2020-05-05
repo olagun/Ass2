@@ -7,7 +7,7 @@ typedef struct FileList {
   int file_version;
   char* file_hash;
   int file_size;     // Number of bytes in file
-  char* file_bytes;  // Contents of file
+  unsigned char* file_bytes;  // Contents of file
   char file_status;  // This is only for .Update & .Conflict files, and not in
                      // .Manifest
 

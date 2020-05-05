@@ -26,8 +26,8 @@ char* read_until(int fd, char delim) {
 }
 
 // Reads `n` bytes from a file descriptor
-char* read_nbytes(int fd, int n) {
-  char* tmp = calloc(n + 1, sizeof(char));
+unsigned char* read_nbytes(int fd, int n) {
+  unsigned char* tmp = calloc(n + 1, sizeof(char));
   int bytes_read = 0;
   int total_read = 0;
 

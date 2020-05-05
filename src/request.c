@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "src/compression.h"
 #include "src/read.h"
 #include "src/util/color.h"
 
@@ -23,17 +24,22 @@ void request_write(int fd, Request* request) {
   dprintf(fd, "%s:", request->command_name);     // <command_name>:
   dprintf(fd, "%s:", request->project_name);     // <project_name>:
   dprintf(fd, "%d:", request->project_version);  // <project_version>:
-  dprintf(fd, "%d:", request->file_count);       // <file_count>:
 
-  FileList* item = request->filelist;
-  while (item != NULL) {
-    dprintf(fd, "%s:", item->file_path);           // <file_path>:
-    dprintf(fd, "%d:", item->file_version);        // <file_version>:
-    dprintf(fd, "%s:", item->file_hash);           // <file_hash>:
-    dprintf(fd, "%d:", item->file_size);           // <file_size>:
-    write(fd, item->file_bytes, item->file_size);  // <file_bytes>
-    item = item->next;
-  }
+  // Compress files
+  write_filelist_compressed(fd, request->filelist);
+
+  // Without compression
+  // dprintf(fd, "%d:", request->file_count);       // <file_count>:
+
+  // FileList* item = request->filelist;
+  // while (item != NULL) {
+  //   dprintf(fd, "%s:", item->file_path);           // <file_path>:
+  //   dprintf(fd, "%d:", item->file_version);        // <file_version>:
+  //   dprintf(fd, "%s:", item->file_hash);           // <file_hash>:
+  //   dprintf(fd, "%d:", item->file_size);           // <file_size>:
+  //   write(fd, item->file_bytes, item->file_size);  // <file_bytes>
+  //   item = item->next;
+  // }
 
   request_log(request);
 }
@@ -52,20 +58,25 @@ Request* request_read(int fd) {
   request->command_name = read_until(fd, ':');           // <command_name>:
   request->project_name = read_until(fd, ':');           // <project_name>:
   request->project_version = atoi(read_until(fd, ':'));  // <project_version>:
-  request->file_count = atoi(read_until(fd, ':'));       // <file_count>:
 
-  int n = request->file_count;
-  for (; n > 0; n--) {  // Read in every file
-    FileList* item = filelist_new();
-    item->file_path = read_until(fd, ':');                // <file_path>:
-    item->file_version = atoi(read_until(fd, ':'));       // <file_version>:
-    item->file_hash = read_until(fd, ':');                // <file_hash>:
-    item->file_size = atoi(read_until(fd, ':'));          // <file_size>:
-    item->file_bytes = read_nbytes(fd, item->file_size);  // <file_bytes>
+  // Decompress files
+  request->filelist = read_compressed_filelist(fd);
 
-    // Append item to list
-    request->filelist = filelist_append(request->filelist, item);
-  }
+  // Without compression
+  // request->file_count = atoi(read_until(fd, ':'));       // <file_count>:
+
+  // int n = request->file_count;
+  // for (; n > 0; n--) {  // Read in every file
+  //   FileList* item = filelist_new();
+  //   item->file_path = read_until(fd, ':');                // <file_path>:
+  //   item->file_version = atoi(read_until(fd, ':'));       // <file_version>:
+  //   item->file_hash = read_until(fd, ':');                // <file_hash>:
+  //   item->file_size = atoi(read_until(fd, ':'));          // <file_size>:
+  //   item->file_bytes = read_nbytes(fd, item->file_size);  // <file_bytes>
+
+  //   // Append item to list
+  //   request->filelist = filelist_append(request->filelist, item);
+  // }
 
   request_log(request);
 
@@ -103,4 +114,5 @@ void request_log(Request* request) {
   }
 
   printf("╰─\n");
+  printf("\n");
 }
