@@ -44,34 +44,6 @@ echo 'example file 3' > proj1/ex3.txt
 # Test Case 6: Attempt to 'Push' without a .commit file. Expect faiure.\n");
  ../client/WTF push proj1
 
-# Test Case 7: 'Commit' the project. Expect success.
-../client/WTF commit proj1
-
-# Test Case 8: 'Push' the project after commit. Expect success.
-../client/WTF push proj1
-
-# Test Case 9: Attempting to 'commit' the project without any differences. Expect success.\n");
-../client/WTF commit proj1
-
-# Test Case 10: Modify a file ex1.txt, then 'commit' & 'push'. Expect success.\n");
-echo 'Exmaple 1 modified' >> proj1/ex1.txt
-../client/WTF commit proj1
-../client/WTF push   proj1
-
 # Test Case 11: Attempting to 'Upgrade' the Project without a .update file. Expect failure.
 ../client/WTF upgrade proj1
 
-# Test Case 12: Attempting to 'Update' the Project without any removed Project files. Expect 'Up to date'.\n");
-../client/WTF update proj1
-
-# Test Case 13: 'Remove' a Project file. Expect success.
-../client/WTF remove proj1 ex1.txt
-
-# Test Case 14: Attempting to 'Remove' a file that is not being tracked. Expect failure.
-../client/WTF remove proj1 ex1.txt
-
-# Test Case 15: Removing Project files, then Update the Project. Expect success.
- ../client/WTF update proj1 ex1.txt
-
-# Test Case 16: 'Upgrade' the Project. Expect success.
-../client/WTF upgrade proj1

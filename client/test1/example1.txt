@@ -1,2 +1,0 @@
-Test1, example 1 file
-Test1, example 1 file, modified
