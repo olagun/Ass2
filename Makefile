@@ -1,7 +1,7 @@
 tar:
-	tar -czf Ass3.tar.gz Ass3
-	rm -rf Ass3
+	tar -czf Asst3.tgz Asst3
+	rm -rf Asst3
 
 untar:
-	tar -xzf Ass3.tar.gz
-	rm -f Ass3.tar.gz
+	tar -xzf Asst3.tgz
+	rm -f Ass3.tgz

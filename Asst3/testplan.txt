@@ -1,15 +1,15 @@
 #!/bin/zsh 
 # if you copy this file into a testplan.zsh file, you can execute the file directly
-cd Ass2
+cd Asst3
 make all
 
 # Open first terminal
-cd Ass2
+cd Asst3
 make all
 make run_server
 
 # Open second terminal
-cd Ass2
+cd Asst3
 mkdir test
 cd test
 
