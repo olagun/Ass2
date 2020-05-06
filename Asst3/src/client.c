@@ -75,7 +75,7 @@ int client_open() {
   struct addrinfo* result;
   if (getaddrinfo(config->ip, config->port, &hints, &result) != 0) {
     printf(BRED
-           "[Client Errror]"
+           "[Client Error]"
            " %s\n",
            strerror(errno));
     return -1;
@@ -87,7 +87,7 @@ int client_open() {
   // Add connection to socket
   if (connect(socket_fd, result->ai_addr, result->ai_addrlen) != 0) {
     printf(BRED
-           "[Client Errror]"
+           "[Client Error]"
            " %s\n",
            strerror(errno));
     return -1;
