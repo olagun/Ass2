@@ -4,18 +4,18 @@ author:
   - Sam Olagun
   - Maanya Tandon
 urlcolor: blue
-geometry: margin=3cm
+geometry: margin=2.5cm
 header-includes: \usepackage{color}
 ---
 
-| Make Targets      | Description                                                             |
-| ----------------- | ----------------------------------------------------------------------- |
-| `make all`        | Builds the server, client, and tests and puts them in separate folders. |
-| `make clean`      | Removes server, client, and test folders.                               |
-| `make client`     | Builds the client, `wtf_client.c`, and moves it to the `client` folder. |
-| `make server`     | Builds the server, `wtf_server.c`, and moves it to the `server` folder. |
-| `make test`       | Builds the tests, `wtf_test.c`, and moves them to the `test` folder.    |
-| `make run_server` | Shortcut for running the server on port \textcolor{OliveGreen}{:8000}.  |
+| Make Targets      | Description                                                               |
+| ----------------- | ------------------------------------------------------------------------- |
+| `make all`        | Builds the server, client, and tests and puts them into separate folders. |
+| `make clean`      | Removes server, client, and test folders.                                 |
+| `make client`     | Builds the client, `wtf_client.c`, and moves it to the `client` folder.   |
+| `make server`     | Builds the server, `wtf_server.c`, and moves it to the `server` folder.   |
+| `make test`       | Builds the tests, `wtf_test.c`, and moves them to the `test` folder.      |
+| `make run_server` | Shortcut for running the server on port \textcolor{OliveGreen}{:8000}.    |
 
 | Command          | Description                                                                                         |
 | ---------------- | --------------------------------------------------------------------------------------------------- |
@@ -63,18 +63,18 @@ Our `.Manifest` file follows the assignment description exactly.
 Our `.Commit`, `.Update` and `.Conflict` files follow the assignment description exactly as well.
 
 ```md
-A <file_path> <server_hash>
-M <file_path> <server_hash>
-D <file_path> <server_hash>
+A <file_path> <hash>
+M <file_path> <hash>
+D <file_path> <hash>
 ```
 
 # Modularity and Program Design
 
-We knew that our project was going to get large quickly, so we organized it into modules. We created an `includes` folder containing interfaces for every function created and a `util` folder for commonly used utilities (See: _src_ for all of the modules that we created). We also separated commands into C files (See: _src/commands_) and created make shortcuts that made compiling and unit testing easy (See: _Makefile_).
+We knew that our project was going to get large quickly, so we organized it into modules. We created an `includes` folder containing interfaces for every function created and a `util` folder for commonly used utilities (See: _src_ for all of the modules that we created and _src/util_ for all of the utilities). We also separated commands into C files (See: _src/commands_) and created make shortcuts that made compiling and unit testing easy (See: _Makefile_).
 
 # Compression
 
-Our project implements all 3 parts of the extra credit. We compress all files that are sent between the server and client (See: _src/request.c:63_, _src/request.c:29_, _src/response.c:31_, _src/response.c:63_) and compress all items pushed to history (See: _src/commands/push.c:148_) and we do this all without system calls (See: _src/compression.c_). A big part of this was modularity—making the tools that we needed to store files in memory easily (See: _src/filelist.c_) and abtracting away compression (See: _src/compression.c_ ).
+Our project implements all 3 parts of the extra credit. We compress all files that are sent between the server and client (See: _src/request.c:63_, _src/request.c:29_, _src/response.c:31_, _src/response.c:63_) and compress all items pushed to history (See: _src/commands/push.c:148_) and we do this all without system calls (See: _src/compression.c_). A big part of this was modularity—making the tools that we needed to store files in memory easily (See: _src/filelist.c_) and abstracting away compression (See: _src/compression.c_ ).
 
 # Threading and Mutexes
 
@@ -89,9 +89,9 @@ struct MutexList {
 };
 ```
 
-The linked list stores essential information about each mutex inlcuding it's lock status. We created functions `add_project`, `remove_project`, `lock_project`, and `unlock_project` for performing mutex operations based on project names (See: _src/mutexlist.c_). These functions were complete with error checking so that you couldn't lock a unlock twice and such operations would be logged as errors (See: _src/mutexlist.c:123_). We also return booleans on each mutex operation to indicate success or failure. This is important because mutex operations aren't guarenteed to be legal, so it's important that that mutex functions communicated bad behavior to their callers.
+The linked list stores essential information about each mutex inlcuding it's lock status. We created functions `add_project`, `remove_project`, `lock_project`, and `unlock_project` for performing mutex operations based on project names (See: _src/mutexlist.c_). These functions were complete with error checking so that you couldn't lock a unlock twice and such operations would be logged as errors (See: _src/mutexlist.c:123_). We also return booleans on each mutex operation to indicate success or failure. This is important because mutex operations aren't guarenteed to be legal, so it's important that that mutex functions communicate bad behavior to their callers.
 
-We call use our mutex functions in 3 places. For all commands that aren't create or destory, we call a mutex on the project that the command involves (See: _wtf_server.c:48_). For create, we create a new mutex and lock it immediately (). We unlock that mutex before we return to the client (See: ). For destory, we surround the critical deletion code with lock and unlock, then unlock and remove the project mutex once we're done. The removed mutex may still have users, but the destroy has already occured at this point and the project no longer exists so this is not a problem.
+We call our mutex functions in 3 places. For all commands that aren't create or destory, we call a mutex on the project that the command involves (See: _wtf_server.c:48_). For create, we create a new mutex and lock it immediately (See: _create.c:66_). We unlock that mutex before we return to the client (See: _create.c:78_, _create.c:107_). For destroy, we surround the critical section with lock and unlock, then unlock and remove the project mutex once we're done. The removed mutex may still have users, but the destroy has already occured at this point and the project no longer exists, so this is not a problem.
 
 # Protocol
 
