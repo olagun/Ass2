@@ -4,4 +4,4 @@ tar:
 
 untar:
 	tar -xzf Asst3.tgz
-	rm -f Ass3.tgz
+	rm -f Asst3.tgz
